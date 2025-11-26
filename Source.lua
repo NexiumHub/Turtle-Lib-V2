@@ -81,23 +81,22 @@ local xOffset = 20
 local uis = game:GetService("UserInputService")
 local keybindConnection
 
--- THEME ENGINE
-local Themes = {
+-- THEME ENGINElocal Themes = {
     Dark = {
-        Window = Color3.fromRGB(47, 54, 64),
-        WindowBorder = Color3.fromRGB(47, 54, 64),
-        Header = Color3.fromRGB(0, 168, 255),
-        HeaderBorder = Color3.fromRGB(0, 168, 255),
-        HeaderText = Color3.fromRGB(47, 54, 64),
-        Primary = Color3.fromRGB(0, 151, 230),
-        Button = Color3.fromRGB(53, 59, 72),
-        ButtonBorder = Color3.fromRGB(113, 128, 147),
-        Text = Color3.fromRGB(245, 246, 250),
-        Accent = Color3.fromRGB(76, 209, 55),
-        SliderFill = Color3.fromRGB(76, 209, 55),
-        ToggleOn = Color3.fromRGB(68, 189, 50),
-        PickerBackground = Color3.fromRGB(47, 54, 64),
-        RainbowAccent = false,
+        Window = Color3.fromRGB(28,28,28),       -- like #1c1c1c
+        WindowBorder = Color3.fromRGB(28,28,28),
+        Header = Color3.fromRGB(40,40,40),       -- like #282828
+        HeaderText = Color3.fromRGB(240,240,240),
+        Button = Color3.fromRGB(38,38,38),       -- like #262626
+        ButtonBorder = Color3.fromRGB(60,60,60), -- like #3c3c3c
+        Text = Color3.fromRGB(230,230,230),
+        Accent = Color3.fromRGB(224,224,224),
+        ToggleOn = Color3.fromRGB(0,255,0),
+        SliderFill = Color3.fromRGB(255,255,255)
+        -- etc.
+    },
+    -- other themes...
+}
     },
     MatrixGreen = {
         Window = Color3.fromRGB(20, 24, 20),
