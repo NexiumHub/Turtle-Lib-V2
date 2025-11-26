@@ -1,6 +1,5 @@
--- Updated Turtle UI Lib with Theme Support (Style 1 - Full Theme)
--- Adds built-in themes: Dark, MatrixGreen, NeonBlue, GlassDark, AestheticPink
--- Backwards compatible with original API.
+-- TurtleUiLib (Updated) — Modern HTML-like style, themes, and smooth animations
+-- Keeps original API: library:Window(name) -> functions: Button, Label, Toggle, Box, Slider, Dropdown, ColorPicker, Destroy
 
 local library = {}
 local windowCount = 0
@@ -11,7 +10,6 @@ local pastSliders = {}
 local dropdowns = {}
 local dropdownSizes = {}
 local destroyed
-
 local colorPickers = {}
 
 if game.CoreGui:FindFirstChild('TurtleUiLib') then
@@ -19,46 +17,52 @@ if game.CoreGui:FindFirstChild('TurtleUiLib') then
     destroyed = true
 end
 
+-- Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local mouse = LocalPlayer:GetMouse()
+local RunService = game:GetService("RunService")
+local stepped = RunService.Stepped
+local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
+
+-- Helpers
 function Lerp(a, b, c)
     return a + ((b - a) * c)
 end
 
-local players = game:service('Players');
-local player = players.LocalPlayer;
-local mouse = player:GetMouse();
-local run = game:service('RunService');
-local stepped = run.Stepped;
+-- Drag helper
 function Dragify(obj)
-	spawn(function()
-		local minitial;
-		local initial;
-		local isdragging;
-	    obj.InputBegan:Connect(function(input)
-			if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-				isdragging = true;
-				minitial = input.Position;
-				initial = obj.Position;
-				local con;
+    spawn(function()
+        local minitial
+        local initial
+        local isdragging
+        obj.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isdragging = true
+                minitial = input.Position
+                initial = obj.Position
+                local con
                 con = stepped:Connect(function()
-        			if isdragging then
-						local delta = Vector3.new(mouse.X, mouse.Y, 0) - minitial;
-						obj.Position = UDim2.new(initial.X.Scale, initial.X.Offset + delta.X, initial.Y.Scale, initial.Y.Offset + delta.Y);
-					else
-						con:Disconnect();
-					end;
-                end);
+                    if isdragging then
+                        local delta = Vector3.new(mouse.X, mouse.Y, 0) - minitial
+                        obj.Position = UDim2.new(initial.X.Scale, initial.X.Offset + delta.X, initial.Y.Scale, initial.Y.Offset + delta.Y)
+                    else
+                        con:Disconnect()
+                    end
+                end)
                 input.Changed:Connect(function()
-    			    if input.UserInputState == Enum.UserInputState.End then
-					    isdragging = false;
-				    end;
-			    end);
-		end;
-	end);
-end)
+                    if input.UserInputState == Enum.UserInputState.End then
+                        isdragging = false
+                    end
+                end)
+            end
+        end)
+    end)
 end
 
--- Instances and protection:
-local function protect_gui(obj) 
+-- Instances and protection
+local function protect_gui(obj)
     if destroyed then
        obj.Parent = game.CoreGui
        return
@@ -73,94 +77,86 @@ local function protect_gui(obj)
     end
 end
 
-local TurtleUiLib = Instance.new("ScreenGui")
-TurtleUiLib.Name = "TurtleUiLib"
-protect_gui(TurtleUiLib)
-
-local xOffset = 20
-local uis = game:GetService("UserInputService")
-local keybindConnection
-
--- THEME ENGINE
+-- Theme engine (neutral, modern palettes)
 local Themes = {
     Dark = {
-        Window = Color3.fromRGB(47, 54, 64),
-        WindowBorder = Color3.fromRGB(47, 54, 64),
-        Header = Color3.fromRGB(0, 168, 255),
-        HeaderBorder = Color3.fromRGB(0, 168, 255),
-        HeaderText = Color3.fromRGB(47, 54, 64),
-        Primary = Color3.fromRGB(0, 151, 230),
-        Button = Color3.fromRGB(53, 59, 72),
-        ButtonBorder = Color3.fromRGB(113, 128, 147),
-        Text = Color3.fromRGB(245, 246, 250),
-        Accent = Color3.fromRGB(76, 209, 55),
-        SliderFill = Color3.fromRGB(76, 209, 55),
-        ToggleOn = Color3.fromRGB(68, 189, 50),
-        PickerBackground = Color3.fromRGB(47, 54, 64),
+        Window = Color3.fromRGB(28,28,28),
+        WindowBorder = Color3.fromRGB(28,28,28),
+        Header = Color3.fromRGB(40,40,40),
+        HeaderBorder = Color3.fromRGB(40,40,40),
+        HeaderText = Color3.fromRGB(240,240,240),
+        Primary = Color3.fromRGB(60,60,60),
+        Button = Color3.fromRGB(38,38,38),
+        ButtonBorder = Color3.fromRGB(60,60,60),
+        Text = Color3.fromRGB(230,230,230),
+        Accent = Color3.fromRGB(220,220,220),
+        SliderFill = Color3.fromRGB(255,255,255), -- white slider knob/fill
+        ToggleOn = Color3.fromRGB(200,200,200),
+        PickerBackground = Color3.fromRGB(32,32,32),
         RainbowAccent = false,
     },
     MatrixGreen = {
-        Window = Color3.fromRGB(20, 24, 20),
-        WindowBorder = Color3.fromRGB(20, 24, 20),
-        Header = Color3.fromRGB(0, 255, 0),
-        HeaderBorder = Color3.fromRGB(0, 255, 0),
-        HeaderText = Color3.fromRGB(10, 10, 10),
-        Primary = Color3.fromRGB(0, 255, 0),
-        Button = Color3.fromRGB(15, 18, 15),
-        ButtonBorder = Color3.fromRGB(40, 40, 40),
-        Text = Color3.fromRGB(220, 255, 220),
-        Accent = Color3.fromRGB(0, 255, 0),
-        SliderFill = Color3.fromRGB(0, 255, 0),
-        ToggleOn = Color3.fromRGB(0, 200, 0),
-        PickerBackground = Color3.fromRGB(15, 18, 15),
+        Window = Color3.fromRGB(20,24,20),
+        WindowBorder = Color3.fromRGB(20,24,20),
+        Header = Color3.fromRGB(40,60,40),
+        HeaderBorder = Color3.fromRGB(40,60,40),
+        HeaderText = Color3.fromRGB(230,230,230),
+        Primary = Color3.fromRGB(36,48,36),
+        Button = Color3.fromRGB(25,30,25),
+        ButtonBorder = Color3.fromRGB(50,60,50),
+        Text = Color3.fromRGB(220,235,220),
+        Accent = Color3.fromRGB(125,140,125),
+        SliderFill = Color3.fromRGB(216,235,216),
+        ToggleOn = Color3.fromRGB(100,140,100),
+        PickerBackground = Color3.fromRGB(25,30,25),
         RainbowAccent = false,
     },
     NeonBlue = {
-        Window = Color3.fromRGB(10, 16, 30),
-        WindowBorder = Color3.fromRGB(10, 16, 30),
-        Header = Color3.fromRGB(0, 200, 255),
-        HeaderBorder = Color3.fromRGB(0, 200, 255),
-        HeaderText = Color3.fromRGB(0, 0, 0),
-        Primary = Color3.fromRGB(0, 200, 255),
-        Button = Color3.fromRGB(20, 28, 40),
-        ButtonBorder = Color3.fromRGB(60, 120, 200),
-        Text = Color3.fromRGB(245, 246, 250),
-        Accent = Color3.fromRGB(0, 200, 255),
-        SliderFill = Color3.fromRGB(0, 200, 255),
-        ToggleOn = Color3.fromRGB(0, 180, 220),
-        PickerBackground = Color3.fromRGB(20, 28, 40),
+        Window = Color3.fromRGB(18,22,30),
+        WindowBorder = Color3.fromRGB(18,22,30),
+        Header = Color3.fromRGB(35,70,110),
+        HeaderBorder = Color3.fromRGB(35,70,110),
+        HeaderText = Color3.fromRGB(230,230,230),
+        Primary = Color3.fromRGB(30,50,75),
+        Button = Color3.fromRGB(28,33,45),
+        ButtonBorder = Color3.fromRGB(65,90,120),
+        Text = Color3.fromRGB(235,240,245),
+        Accent = Color3.fromRGB(130,160,200),
+        SliderFill = Color3.fromRGB(210,225,255),
+        ToggleOn = Color3.fromRGB(110,140,180),
+        PickerBackground = Color3.fromRGB(25,32,44),
         RainbowAccent = false,
     },
     GlassDark = {
-        Window = Color3.fromRGB(30, 30, 35),
-        WindowBorder = Color3.fromRGB(30, 30, 35),
-        Header = Color3.fromRGB(90, 115, 255),
-        HeaderBorder = Color3.fromRGB(90, 115, 255),
-        HeaderText = Color3.fromRGB(245, 246, 250),
-        Primary = Color3.fromRGB(90, 115, 255),
-        Button = Color3.fromRGB(45, 50, 60),
-        ButtonBorder = Color3.fromRGB(80, 90, 110),
-        Text = Color3.fromRGB(245, 246, 250),
-        Accent = Color3.fromRGB(100, 170, 255),
-        SliderFill = Color3.fromRGB(100, 170, 255),
-        ToggleOn = Color3.fromRGB(85, 140, 255),
-        PickerBackground = Color3.fromRGB(45, 50, 60),
+        Window = Color3.fromRGB(30,32,38),
+        WindowBorder = Color3.fromRGB(30,32,38),
+        Header = Color3.fromRGB(70,90,150),
+        HeaderBorder = Color3.fromRGB(70,90,150),
+        HeaderText = Color3.fromRGB(240,240,240),
+        Primary = Color3.fromRGB(36,46,60),
+        Button = Color3.fromRGB(40,45,55),
+        ButtonBorder = Color3.fromRGB(85,95,115),
+        Text = Color3.fromRGB(240,240,240),
+        Accent = Color3.fromRGB(150,175,220),
+        SliderFill = Color3.fromRGB(220,230,255),
+        ToggleOn = Color3.fromRGB(130,155,200),
+        PickerBackground = Color3.fromRGB(45,50,60),
         RainbowAccent = false,
     },
     AestheticPink = {
-        Window = Color3.fromRGB(34, 20, 28),
-        WindowBorder = Color3.fromRGB(34, 20, 28),
-        Header = Color3.fromRGB(255, 110, 170),
-        HeaderBorder = Color3.fromRGB(255, 110, 170),
-        HeaderText = Color3.fromRGB(245, 246, 250),
-        Primary = Color3.fromRGB(255, 110, 170),
-        Button = Color3.fromRGB(55, 40, 50),
-        ButtonBorder = Color3.fromRGB(120, 90, 110),
-        Text = Color3.fromRGB(245, 246, 250),
-        Accent = Color3.fromRGB(255, 110, 170),
-        SliderFill = Color3.fromRGB(255, 110, 170),
-        ToggleOn = Color3.fromRGB(230, 90, 150),
-        PickerBackground = Color3.fromRGB(55, 40, 50),
+        Window = Color3.fromRGB(36,24,30),
+        WindowBorder = Color3.fromRGB(36,24,30),
+        Header = Color3.fromRGB(158,111,125),
+        HeaderBorder = Color3.fromRGB(158,111,125),
+        HeaderText = Color3.fromRGB(245,245,245),
+        Primary = Color3.fromRGB(48,36,40),
+        Button = Color3.fromRGB(55,40,48),
+        ButtonBorder = Color3.fromRGB(110,85,98),
+        Text = Color3.fromRGB(245,245,245),
+        Accent = Color3.fromRGB(190,150,165),
+        SliderFill = Color3.fromRGB(220,180,190),
+        ToggleOn = Color3.fromRGB(170,130,150),
+        PickerBackground = Color3.fromRGB(55,40,48),
         RainbowAccent = false,
     }
 }
@@ -171,7 +167,6 @@ local function resolveThemeInput(v)
     if type(v) == "string" then
         return Themes[v] or currentTheme
     elseif type(v) == "table" then
-        -- merge into a new table: allow partial overrides
         local t = {}
         for k, val in pairs(currentTheme) do t[k] = val end
         for k, val in pairs(v) do t[k] = val end
@@ -181,44 +176,64 @@ local function resolveThemeInput(v)
     end
 end
 
+-- helper: add UICorner + optional UIStroke
+local function addCornerAndStroke(instance, radius, strokeThickness, strokeColor)
+    local ok, err = pcall(function()
+        if instance and instance:IsA("Instance") then
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, radius or 6)
+            corner.Parent = instance
+            if strokeThickness and strokeThickness > 0 then
+                local stroke = Instance.new("UIStroke")
+                stroke.Thickness = strokeThickness
+                if strokeColor then stroke.Color = strokeColor else
+                    if instance:IsA("Frame") or instance:IsA("ImageLabel") then
+                        stroke.Color = instance.BorderColor3 or Color3.new(0,0,0)
+                    else
+                        stroke.Color = Color3.new(0,0,0)
+                    end
+                end
+                stroke.Parent = instance
+            end
+        end
+    end)
+    if not ok then warn("Corner/Stroke helper failed:", err) end
+end
+
 -- Apply theme to existing UI elements (best-effort)
 local function applyThemeToExisting(theme)
-    -- update many common names used in the UI
-    for _, obj in ipairs(TurtleUiLib:GetDescendants()) do
-        if obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("ImageButton") then
-            if obj.Name == "UiWindow" then
-                pcall(function() obj.BackgroundColor3 = theme.Window end)
-            elseif obj.Name == "Header" then
-                pcall(function() obj.BackgroundColor3 = theme.Header end)
-            elseif obj.Name == "Window" then
-                pcall(function() obj.BackgroundColor3 = theme.Window end)
-            elseif obj.Name == "Button" and obj.Parent and obj.Parent.Name == "Window" then
-                pcall(function() obj.BackgroundColor3 = theme.Button; obj.BorderColor3 = theme.ButtonBorder end)
-            elseif obj.Name == "ToggleButton" then
-                pcall(function() obj.BackgroundColor3 = theme.Window end)
-            elseif obj.Name == "ToggleFiller" then
-                pcall(function() obj.BackgroundColor3 = theme.ToggleOn end)
-            elseif obj.Name == "Slider" then
-                pcall(function() obj.BackgroundColor3 = theme.Window end)
-            elseif obj.Name == "SilderFiller" then
-                pcall(function() obj.BackgroundColor3 = theme.SliderFill end)
-            elseif obj.Name == "Dropdown" then
-                pcall(function() obj.BackgroundColor3 = theme.Button; obj.BorderColor3 = theme.ButtonBorder end)
-            elseif obj.Name == "ColorPicker" then
-                pcall(function() obj.BackgroundColor3 = theme.Button end)
-            elseif obj.Name == "ColorPickerFrame" then
-                pcall(function() obj.BackgroundColor3 = theme.PickerBackground; obj.BorderColor3 = theme.PickerBackground end)
-            elseif obj:IsA("TextLabel") or obj:IsA("TextBox") then
-                -- adjust text color for known labels
-                if obj.Name == "HeaderText" or obj.Name == "Title" then
-                    pcall(function() obj.TextColor3 = theme.HeaderText end)
-                else
-                    pcall(function() obj.TextColor3 = theme.Text end)
+    for _, obj in ipairs(game.CoreGui:GetDescendants()) do
+        -- Only affect TurtleUiLib descendants
+        if obj.Parent and obj.Parent:IsDescendantOf(game.CoreGui) and obj:FindFirstAncestor("TurtleUiLib") then
+            pcall(function()
+                if obj.Name == "UiWindow" then obj.BackgroundColor3 = theme.Window end
+                if obj.Name == "Header" then obj.BackgroundColor3 = theme.Header end
+                if obj.Name == "Window" then obj.BackgroundColor3 = theme.Window end
+                if obj.Name == "Button" and obj.Parent and obj.Parent.Name == "Window" then
+                    obj.BackgroundColor3 = theme.Button
+                    obj.BorderColor3 = theme.ButtonBorder
                 end
-            end
-        elseif obj:IsA("TextLabel") or obj:IsA("TextButton") then
-            -- generic fallback for text color
-            pcall(function() obj.TextColor3 = theme.Text end)
+                if obj.Name == "ToggleButton" then obj.BackgroundColor3 = theme.Window end
+                if obj.Name == "ToggleFiller" then obj.BackgroundColor3 = theme.ToggleOn end
+                if obj.Name == "Slider" then obj.BackgroundColor3 = theme.Window end
+                if obj.Name == "SilderFiller" then obj.BackgroundColor3 = theme.SliderFill end
+                if obj.Name == "Dropdown" then
+                    obj.BackgroundColor3 = theme.Button
+                    obj.BorderColor3 = theme.ButtonBorder
+                end
+                if obj.Name == "ColorPicker" then obj.BackgroundColor3 = theme.Button end
+                if obj.Name == "ColorPickerFrame" then
+                    obj.BackgroundColor3 = theme.PickerBackground
+                    obj.BorderColor3 = theme.PickerBackground
+                end
+                if (obj:IsA("TextLabel") or obj:IsA("TextBox") or obj:IsA("TextButton")) then
+                    if obj.Name == "HeaderText" or obj.Name == "Title" then
+                        obj.TextColor3 = theme.HeaderText
+                    else
+                        obj.TextColor3 = theme.Text
+                    end
+                end
+            end)
         end
     end
 end
@@ -226,7 +241,6 @@ end
 function library:SetTheme(themeInput)
     local t = resolveThemeInput(themeInput)
     currentTheme = t
-    -- apply theme to existing UI
     applyThemeToExisting(currentTheme)
 end
 
@@ -236,57 +250,60 @@ end
 
 function library:ListThemes()
     local names = {}
-    for k, _ in pairs(Themes) do
-        table.insert(names, k)
-    end
+    for k, _ in pairs(Themes) do table.insert(names, k) end
     return names
 end
 
--- expose Themes so user can copy/modify
 library.Themes = Themes
-
--- default theme
 library:SetTheme("Dark")
 
--- Maintain original functions but use theme values rather than literal RGBs
+-- Create main ScreenGui
+local TurtleUiLib = Instance.new("ScreenGui")
+TurtleUiLib.Name = "TurtleUiLib"
+protect_gui(TurtleUiLib)
+
+local xOffset = 20
+local keybindConnection
+
 function library:Destroy()
-    TurtleUiLib:Destroy()
-    if keybindConnection then
-        keybindConnection:Disconnect()
-    end
+    if TurtleUiLib and TurtleUiLib.Parent then TurtleUiLib:Destroy() end
+    if keybindConnection then keybindConnection:Disconnect() end
 end
+
 function library:Hide()
    TurtleUiLib.Enabled = not TurtleUiLib.Enabled
-end	
+end
 
 function library:Keybind(key)
     if keybindConnection then keybindConnection:Disconnect() end
-
-    keybindConnection = uis.InputBegan:Connect(function(input, gp)
+    keybindConnection = UserInputService.InputBegan:Connect(function(input, gp)
         if not gp and input.KeyCode == Enum.KeyCode[key] then
             TurtleUiLib.Enabled = not TurtleUiLib.Enabled
         end
     end)
 end
 
-function library:Window(name) 
+-- Main Window builder
+function library:Window(name)
     windowCount = windowCount + 1
     local winCount = windowCount
     local zindex = winCount * 7
-    local UiWindow = Instance.new("Frame")
 
+    -- Outer frame (UiWindow)
+    local UiWindow = Instance.new("Frame")
     UiWindow.Name = "UiWindow"
     UiWindow.Parent = TurtleUiLib
-    UiWindow.BackgroundColor3 = currentTheme.Primary -- accent background for outer area
+    UiWindow.BackgroundColor3 = currentTheme.Primary
     UiWindow.BorderColor3 = currentTheme.WindowBorder
     UiWindow.Position = UDim2.new(0, xOffset, 0, 20)
     UiWindow.Size = UDim2.new(0, 207, 0, 33)
     UiWindow.ZIndex = 4 + zindex
     UiWindow.Active = true
+    addCornerAndStroke(UiWindow, 8, 0)
     Dragify(UiWindow)
-
     xOffset = xOffset + 230
 
+    -- Header
     local Header = Instance.new("Frame")
     Header.Name = "Header"
     Header.Parent = UiWindow
@@ -295,22 +312,22 @@ function library:Window(name)
     Header.Position = UDim2.new(0, 0, -0.0202544238, 0)
     Header.Size = UDim2.new(0, 207, 0, 26)
     Header.ZIndex = 5 + zindex
+    addCornerAndStroke(Header, 8, 0)
 
     local HeaderText = Instance.new("TextLabel")
     HeaderText.Name = "HeaderText"
     HeaderText.Parent = Header
-    HeaderText.BackgroundColor3 = currentTheme.Window
-    HeaderText.BackgroundTransparency = 1.000
-    HeaderText.Position = UDim2.new(0, 0, -0.0020698905, 0)
-    HeaderText.Size = UDim2.new(0, 206, 0, 33)
+    HeaderText.BackgroundTransparency = 1
+    HeaderText.Position = UDim2.new(0, 12, -0.0020698905, 0)
+    HeaderText.Size = UDim2.new(0, 180, 0, 26)
     HeaderText.ZIndex = 6 + zindex
     HeaderText.Font = Enum.Font.SourceSans
     HeaderText.Text = name or "Window"
     HeaderText.TextColor3 = currentTheme.HeaderText
-    HeaderText.TextSize = 17.000
+    HeaderText.TextSize = 17
 
+    -- Minimise button with tween
     local Minimise = Instance.new("TextButton")
-    local Window = Instance.new("Frame")
     Minimise.Name = "Minimise"
     Minimise.Parent = Header
     Minimise.BackgroundColor3 = currentTheme.Header
@@ -321,16 +338,10 @@ function library:Window(name)
     Minimise.Font = Enum.Font.SourceSansLight
     Minimise.Text = "_"
     Minimise.TextColor3 = currentTheme.Text
-    Minimise.TextSize = 20.000
-    Minimise.MouseButton1Up:connect(function()
-        Window.Visible = not Window.Visible
-	    if Window.Visible then
-		    Minimise.Text = "_"
-	    else
-		    Minimise.Text = "+"
-	    end
-    end)
+    Minimise.TextSize = 20
+    addCornerAndStroke(Minimise, 5, 0)
 
+    local Window = Instance.new("Frame")
     Window.Name = "Window"
     Window.Parent = Header
     Window.BackgroundColor3 = currentTheme.Window
@@ -338,7 +349,28 @@ function library:Window(name)
     Window.Position = UDim2.new(0, 0, 0, 0)
     Window.Size = UDim2.new(0, 207, 0, 33)
     Window.ZIndex = 1 + zindex
+    addCornerAndStroke(Window, 6, 0)
 
+    -- animate minimize/open
+    Minimise.MouseButton1Up:Connect(function()
+        local visible = not Window.Visible
+        local tInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        if visible then
+            Window.Visible = true
+            TweenService:Create(Window, tInfo, {Size = UDim2.new(0,207,0,sizes[winCount]+10), BackgroundTransparency = 0}):Play()
+            Minimise.Text = "_"
+        else
+            -- collapse to header height then hide
+            local closeTween = TweenService:Create(Window, tInfo, {Size = UDim2.new(0,207,0,33), BackgroundTransparency = 1})
+            closeTween:Play()
+            closeTween.Completed:Connect(function()
+                Window.Visible = false
+                Minimise.Text = "+"
+            end)
+        end
+    end)
+
+    -- functions table returned to user
     local functions = {}
     functions.__index = functions
     functions.Ui = UiWindow
@@ -347,9 +379,10 @@ function library:Window(name)
     listOffset[winCount] = 10
 
     function functions:Destroy()
-        self.Ui:Destroy()
+        if self.Ui and self.Ui.Parent then self.Ui:Destroy() end
     end
 
+    -- Button
     function functions:Button(name, callback)
         local name = name or "Button"
         local callback = callback or function() end
@@ -357,8 +390,8 @@ function library:Window(name)
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
 
-        local Button = Instance.new("TextButton")
         listOffset[winCount] = listOffset[winCount] + 32
+        local Button = Instance.new("TextButton")
         Button.Name = "Button"
         Button.Parent = Window
         Button.BackgroundColor3 = currentTheme.Button
@@ -366,18 +399,31 @@ function library:Window(name)
         Button.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Button.Size = UDim2.new(0, 182, 0, 26)
         Button.ZIndex = 2 + zindex
-        Button.Selected = true
         Button.Font = Enum.Font.SourceSans
         Button.TextColor3 = currentTheme.Text
-        Button.TextSize = 16.000
-        Button.TextStrokeTransparency = 123.000
+        Button.TextSize = 16
         Button.TextWrapped = true
         Button.Text = name
-        Button.MouseButton1Down:Connect(callback)
+        addCornerAndStroke(Button, 6, 0)
+
+        -- hover tween
+        Button.MouseEnter:Connect(function()
+            local t = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            pcall(function() TweenService:Create(Button, t, {BackgroundColor3 = currentTheme.Accent}):Play() end)
+        end)
+        Button.MouseLeave:Connect(function()
+            local t = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            pcall(function() TweenService:Create(Button, t, {BackgroundColor3 = currentTheme.Button}):Play() end)
+        end)
+
+        Button.MouseButton1Down:Connect(function(...)
+            pcall(callback, ...)
+        end)
 
         pastSliders[winCount] = false
     end
-    
+
+    -- Label
     function functions:Label(text, color)
         local color = color or currentTheme.Text
 
@@ -388,31 +434,30 @@ function library:Window(name)
         local Label = Instance.new("TextLabel")
         Label.Name = "Label"
         Label.Parent = Window
-        Label.BackgroundColor3 = currentTheme.Window
-        Label.BackgroundTransparency = 1.000
+        Label.BackgroundTransparency = 1
         Label.BorderColor3 = currentTheme.WindowBorder
         Label.Position = UDim2.new(0, 0, 0, listOffset[winCount])
         Label.Size = UDim2.new(0, 206, 0, 29)
         Label.Font = Enum.Font.SourceSans
         Label.Text = text or "Label"
-        Label.TextSize = 16.000
+        Label.TextSize = 16
         Label.ZIndex = 2 + zindex
 
         if type(color) == "boolean" and color then
-	        spawn(function()
-                while wait() do
+            spawn(function()
+                while Label.Parent and wait() do
                     local hue = tick() % 5 / 5
                     Label.TextColor3 = Color3.fromHSV(hue, 1, 1)
                 end
-	        end)
+            end)
         else
             Label.TextColor3 = color
         end
         pastSliders[winCount] = false
-	
-	    return Label
+        return Label
     end
 
+    -- Toggle
     function functions:Toggle(text, on, callback)
         local callback = callback or function() end
 
@@ -422,23 +467,19 @@ function library:Window(name)
         listOffset[winCount] = listOffset[winCount] + 32
 
         local ToggleDescription = Instance.new("TextLabel")
-        local ToggleButton = Instance.new("TextButton")
-        local ToggleFiller = Instance.new("Frame")
-
         ToggleDescription.Name = "ToggleDescription"
         ToggleDescription.Parent = Window
-        ToggleDescription.BackgroundColor3 = currentTheme.Window
-        ToggleDescription.BackgroundTransparency = 1.000
+        ToggleDescription.BackgroundTransparency = 1
         ToggleDescription.Position = UDim2.new(0, 14, 0, listOffset[winCount])
         ToggleDescription.Size = UDim2.new(0, 131, 0, 26)
         ToggleDescription.Font = Enum.Font.SourceSans
         ToggleDescription.Text = text or "Toggle"
         ToggleDescription.TextColor3 = currentTheme.Text
-        ToggleDescription.TextSize = 16.000
-        ToggleDescription.TextWrapped = true
+        ToggleDescription.TextSize = 16
         ToggleDescription.TextXAlignment = Enum.TextXAlignment.Left
         ToggleDescription.ZIndex = 2 + zindex
 
+        local ToggleButton = Instance.new("TextButton")
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
         ToggleButton.BackgroundColor3 = currentTheme.Window
@@ -448,13 +489,10 @@ function library:Window(name)
         ToggleButton.Font = Enum.Font.SourceSans
         ToggleButton.Text = ""
         ToggleButton.TextColor3 = currentTheme.Text
-        ToggleButton.TextSize = 14.000
         ToggleButton.ZIndex = 2 + zindex
-        ToggleButton.MouseButton1Up:Connect(function()
-            ToggleFiller.Visible = not ToggleFiller.Visible
-            callback(ToggleFiller.Visible)
-        end)
+        addCornerAndStroke(ToggleButton, 6, 0)
 
+        local ToggleFiller = Instance.new("Frame")
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
         ToggleFiller.BackgroundColor3 = currentTheme.ToggleOn
@@ -463,9 +501,20 @@ function library:Window(name)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller.Visible = on
         ToggleFiller.ZIndex = 2 + zindex
+        addCornerAndStroke(ToggleFiller, 6, 0)
+
+        -- animate toggle
+        ToggleButton.MouseButton1Up:Connect(function()
+            ToggleFiller.Visible = not ToggleFiller.Visible
+            local targetPos = ToggleFiller.Visible and UDim2.new(0,5,0,5) or UDim2.new(0,5,0,5) -- internal filler used as a check (keeps layout)
+            pcall(function() TweenService:Create(ToggleFiller, TweenInfo.new(0.12), {BackgroundColor3 = ToggleFiller.Visible and currentTheme.ToggleOn or currentTheme.Window}):Play() end)
+            callback(ToggleFiller.Visible)
+        end)
+
         pastSliders[winCount] = false
     end
 
+    -- Text Box
     function functions:Box(text, callback)
         local callback = callback or function() end
 
@@ -485,10 +534,11 @@ function library:Window(name)
         TextBox.PlaceholderText = "..."
         TextBox.Text = ""
         TextBox.TextColor3 = currentTheme.Text
-        TextBox.TextSize = 16.000
-        TextBox.TextStrokeColor3 = currentTheme.Text
+        TextBox.TextSize = 16
         TextBox.ZIndex = 2 + zindex
-        TextBox:GetPropertyChangedSignal('Text'):connect(function()
+        addCornerAndStroke(TextBox, 6, 0)
+
+        TextBox:GetPropertyChangedSignal('Text'):Connect(function()
             callback(TextBox.Text, false)
         end)
         TextBox.FocusLost:Connect(function()
@@ -497,19 +547,19 @@ function library:Window(name)
 
         BoxDescription.Name = "BoxDescription"
         BoxDescription.Parent = TextBox
-        BoxDescription.BackgroundColor3 = currentTheme.Window
-        BoxDescription.BackgroundTransparency = 1.000
+        BoxDescription.BackgroundTransparency = 1
         BoxDescription.Position = UDim2.new(-0.894736826, 0, 0, 0)
         BoxDescription.Size = UDim2.new(0, 75, 0, 26)
         BoxDescription.Font = Enum.Font.SourceSans
         BoxDescription.Text = text or "Box"
         BoxDescription.TextColor3 = currentTheme.Text
-        BoxDescription.TextSize = 16.000
+        BoxDescription.TextSize = 16
         BoxDescription.TextXAlignment = Enum.TextXAlignment.Left
         BoxDescription.ZIndex = 2 + zindex
         pastSliders[winCount] = false
     end
 
+    -- Slider (modern, smooth)
     function functions:Slider(text, min, max, default, callback)
         local text = text or "Slider"
         local min = min or 1
@@ -517,19 +567,11 @@ function library:Window(name)
         local default = default or max/2
         local callback = callback or function() end
         local offset = 70
-        if default > max then
-            default = max
-        elseif default < min then
-            default = min
-        end
-
-        if pastSliders[winCount] then
-            offset = 60
-        end
+        if default > max then default = max elseif default < min then default = min end
+        if pastSliders[winCount] then offset = 60 end
 
         sizes[winCount] = sizes[winCount] + offset
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
-
         listOffset[winCount] = listOffset[winCount] + offset
 
         local Slider = Instance.new("Frame")
@@ -540,46 +582,6 @@ function library:Window(name)
         local Min = Instance.new("TextLabel")
         local Max = Instance.new("TextLabel")
 
-        local isdragging = false
-        local minitial, initial
-
-        function SliderMovement(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                isdragging = true;
-                    minitial = input.Position.X;
-                    initial = SliderButton.Position.X.Offset;
-                    local delta1 = SliderButton.AbsolutePosition.X - initial
-                    local con;
-                    con = stepped:Connect(function()
-                        if isdragging then
-                            local xOffset = mouse.X - delta1 - 3
-                            if xOffset > 175 then
-                                xOffset = 175
-                            elseif xOffset< 0 then
-                                xOffset = 0
-                            end
-                            SliderButton.Position = UDim2.new(0, xOffset , -1.33333337, 0);
-                            SilderFiller.Size = UDim2.new(0, xOffset, 0, 6)
-                            local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
-                            Current.Text = tostring(math.round(value))
-                        else
-                            con:Disconnect();
-                        end;
-                    end);
-                    input.Changed:Connect(function()
-                        if input.UserInputState == Enum.UserInputState.End then
-                            isdragging = false;
-                        end
-                    end)
-            end
-        end
-        function SliderEnd(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
-                callback(math.round(value))
-            end
-        end
-
         Slider.Name = "Slider"
         Slider.Parent = Window
         Slider.BackgroundColor3 = currentTheme.Window
@@ -587,41 +589,6 @@ function library:Window(name)
         Slider.Position = UDim2.new(0, 13, 0, listOffset[winCount])
         Slider.Size = UDim2.new(0, 180, 0, 6)
         Slider.ZIndex = 2 + zindex
-        Slider.InputBegan:Connect(SliderMovement) 
-        Slider.InputEnded:Connect(SliderEnd)      
-
-        SliderButton.Position = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), -1.333337, 0)
-        SliderButton.Name = "SliderButton"
-        SliderButton.Parent = Slider
-        SliderButton.BackgroundColor3 = currentTheme.Button
-        SliderButton.BorderColor3 = currentTheme.ButtonBorder
-        SliderButton.Size = UDim2.new(0, 6, 0, 22)
-        SliderButton.ZIndex = 3 + zindex
-        SliderButton.InputBegan:Connect(SliderMovement)
-        SliderButton.InputEnded:Connect(SliderEnd)    
-
-        Current.Name = "Current"
-        Current.Parent = SliderButton
-        Current.BackgroundTransparency = 1.000
-        Current.Position = UDim2.new(0, 3, 0, 22   )
-        Current.Size = UDim2.new(0, 0, 0, 18)
-        Current.Font = Enum.Font.SourceSans
-        Current.Text = tostring(default)
-        Current.TextColor3 = currentTheme.Text
-        Current.TextSize = 14.000  
-        Current.ZIndex = 2 + zindex
-
-        Description.Name = "Description"
-        Description.Parent = Slider
-        Description.BackgroundColor3 = currentTheme.Window
-        Description.BackgroundTransparency = 1.000
-        Description.Position = UDim2.new(0, -10, 0, -35)
-        Description.Size = UDim2.new(0, 200, 0, 21)
-        Description.Font = Enum.Font.SourceSans
-        Description.Text = text
-        Description.TextColor3 = currentTheme.Text
-        Description.TextSize = 16.000
-        Description.ZIndex = 2 + zindex
 
         SilderFiller.Name = "SilderFiller"
         SilderFiller.Parent = Slider
@@ -630,45 +597,135 @@ function library:Window(name)
         SilderFiller.Size = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), 0, 6)
         SilderFiller.ZIndex = 2 + zindex
         SilderFiller.BorderMode = Enum.BorderMode.Inset
+        addCornerAndStroke(Slider, 4, 0)
+        addCornerAndStroke(SilderFiller, 4, 0)
+
+        SliderButton.Name = "SliderButton"
+        SliderButton.Parent = Slider
+        -- white knob in Dark, otherwise theme button
+        SliderButton.BackgroundColor3 = (currentTheme == Themes.Dark) and Color3.fromRGB(255,255,255) or currentTheme.Button
+        SliderButton.BorderColor3 = currentTheme.ButtonBorder
+        SliderButton.Size = UDim2.new(0, 10, 0, 14)
+        SliderButton.ZIndex = 3 + zindex
+        SliderButton.Position = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), -1.333337, 0)
+        addCornerAndStroke(SliderButton, 6, 0)
+
+        Current.Name = "Current"
+        Current.Parent = SliderButton
+        Current.BackgroundTransparency = 1
+        Current.Position = UDim2.new(0, 3, 0, 22)
+        Current.Size = UDim2.new(0, 0, 0, 18)
+        Current.Font = Enum.Font.SourceSans
+        Current.Text = tostring(default)
+        Current.TextColor3 = currentTheme.Text
+        Current.TextSize = 14
+        Current.ZIndex = 2 + zindex
+
+        Description.Name = "Description"
+        Description.Parent = Slider
+        Description.BackgroundTransparency = 1
+        Description.Position = UDim2.new(0, -10, 0, -35)
+        Description.Size = UDim2.new(0, 200, 0, 21)
+        Description.Font = Enum.Font.SourceSans
+        Description.Text = text
+        Description.TextColor3 = currentTheme.Text
+        Description.TextSize = 16
+        Description.ZIndex = 2 + zindex
 
         Min.Name = "Min"
         Min.Parent = Slider
-        Min.BackgroundColor3 = currentTheme.Window
-        Min.BackgroundTransparency = 1.000
+        Min.BackgroundTransparency = 1
         Min.Position = UDim2.new(-0.00555555569, 0, -7.33333397, 0)
         Min.Size = UDim2.new(0, 77, 0, 50)
         Min.Font = Enum.Font.SourceSans
         Min.Text = tostring(min)
         Min.TextColor3 = currentTheme.Text
-        Min.TextSize = 14.000
+        Min.TextSize = 14
         Min.TextXAlignment = Enum.TextXAlignment.Left
         Min.ZIndex = 2 + zindex
 
         Max.Name = "Max"
         Max.Parent = Slider
-        Max.BackgroundColor3 = currentTheme.Window
-        Max.BackgroundTransparency = 1.000
+        Max.BackgroundTransparency = 1
         Max.Position = UDim2.new(0.577777743, 0, -7.33333397, 0)
         Max.Size = UDim2.new(0, 77, 0, 50)
         Max.Font = Enum.Font.SourceSans
         Max.Text = tostring(max)
         Max.TextColor3 = currentTheme.Text
-        Max.TextSize = 14.000
+        Max.TextSize = 14
         Max.TextXAlignment = Enum.TextXAlignment.Right
         Max.ZIndex = 2 + zindex
+
+        -- tween helper
+        local function updateVisualsTo(xOffset)
+            local tInfo = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            pcall(function()
+                TweenService:Create(SilderFiller, tInfo, {Size = UDim2.new(0, xOffset, 0, 6)}):Play()
+                TweenService:Create(SliderButton, tInfo, {Position = UDim2.new(0, xOffset, -1.33333337, 0)}):Play()
+            end)
+        end
+
+        local isdragging = false
+        local delta1 = 0
+        local function SliderMovement(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isdragging = true
+                delta1 = SliderButton.AbsolutePosition.X - SliderButton.Position.X.Offset
+                local con
+                con = stepped:Connect(function()
+                    if isdragging then
+                        local xOffset = math.clamp(mouse.X - delta1 - 3, 0, Slider.Size.X.Offset - 5)
+                        SliderButton.Position = UDim2.new(0, xOffset , -1.33333337, 0)
+                        SilderFiller.Size = UDim2.new(0, xOffset, 0, 6)
+                        local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
+                        Current.Text = tostring(math.round(value))
+                    else
+                        con:Disconnect()
+                    end
+                end)
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        isdragging = false
+                        local xOffset = SliderButton.Position.X.Offset
+                        local value = Lerp(min, max, xOffset/(Slider.Size.X.Offset-5))
+                        callback(math.round(value))
+                        updateVisualsTo(xOffset)
+                    end
+                end)
+            end
+        end
+
+        Slider.InputBegan:Connect(SliderMovement)
+        Slider.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                local xOffset = SliderButton.Position.X.Offset
+                local value = Lerp(min, max, xOffset/(Slider.Size.X.Offset-5))
+                callback(math.round(value))
+            end
+        end)
+        SliderButton.InputBegan:Connect(SliderMovement)
+        SliderButton.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                local xOffset = SliderButton.Position.X.Offset
+                local value = Lerp(min, max, xOffset/(Slider.Size.X.Offset-5))
+                callback(math.round(value))
+                updateVisualsTo(xOffset)
+            end
+        end)
+
         pastSliders[winCount] = true
 
         local slider = {}
         function slider:SetValue(value)
-	        value = math.clamp(value, min, max)
+            value = math.clamp(value, min, max)
             local xOffset = (value-min)/(max-min) * (Slider.Size.X.Offset - 5)
-            SliderButton.Position = UDim2.new(0, xOffset , -1.33333337, 0);
-            SilderFiller.Size = UDim2.new(0, xOffset, 0, 6)
             Current.Text = tostring(math.round(value))
+            updateVisualsTo(xOffset)
         end
         return slider
     end
 
+    -- Dropdown (animated)
     function functions:Dropdown(text, buttons, callback, selective)
         local text = text or "Dropdown"
         local buttons = buttons or {}
@@ -680,7 +737,6 @@ function library:Window(name)
 
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
-
         listOffset[winCount] = listOffset[winCount] + 32
 
         Dropdown.Name = "Dropdown"
@@ -689,39 +745,23 @@ function library:Window(name)
         Dropdown.BorderColor3 = currentTheme.ButtonBorder
         Dropdown.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Dropdown.Size = UDim2.new(0, 182, 0, 26)
-        Dropdown.Selected = true
         Dropdown.Font = Enum.Font.SourceSans
         Dropdown.Text = tostring(text)
         Dropdown.TextColor3 = currentTheme.Text
-        Dropdown.TextSize = 16.000
-        Dropdown.TextStrokeTransparency = 123.000
+        Dropdown.TextSize = 16
         Dropdown.TextWrapped = true
         Dropdown.ZIndex = 3 + zindex
-        Dropdown.MouseButton1Up:Connect(function()
-            for i, v in pairs(dropdowns) do
-                if v ~= DropdownFrame then
-                v.Visible = false
-                DownSign.Rotation = 0
-                end
-            end
-            if DropdownFrame.Visible then
-                DownSign.Rotation = 0
-            else
-                DownSign.Rotation = 180
-            end
-            DropdownFrame.Visible = not DropdownFrame.Visible
-        end)
+        addCornerAndStroke(Dropdown, 6, 0)
 
         DownSign.Name = "DownSign"
         DownSign.Parent = Dropdown
-        DownSign.BackgroundColor3 = currentTheme.Window
-        DownSign.BackgroundTransparency = 1.000
+        DownSign.BackgroundTransparency = 1
         DownSign.Position = UDim2.new(0, 155, 0, 2)
         DownSign.Size = UDim2.new(0, 27, 0, 22)
         DownSign.Font = Enum.Font.SourceSans
         DownSign.Text = "^"
         DownSign.TextColor3 = currentTheme.Text
-        DownSign.TextSize = 20.000
+        DownSign.TextSize = 20
         DownSign.ZIndex = 4 + zindex
         DownSign.TextYAlignment = Enum.TextYAlignment.Bottom
 
@@ -739,9 +779,41 @@ function library:Window(name)
         DropdownFrame.ZIndex = 5 + zindex
         DropdownFrame.ScrollingDirection = Enum.ScrollingDirection.Y
         DropdownFrame.ScrollBarImageColor3 = currentTheme.Text
+        addCornerAndStroke(DropdownFrame, 6, 0)
+
         table.insert(dropdowns, DropdownFrame)
         local dropFunctions = {}
         local canvasSize = 0
+
+        local function toggleDropdown()
+            -- animate height and caret rotation
+            local tInfo = TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+            if DropdownFrame.Visible then
+                -- collapse
+                TweenService:Create(DropdownFrame, tInfo, {Size = UDim2.new(0,182,0,0)}):Play()
+                TweenService:Create(DownSign, tInfo, {Rotation = 0}):Play()
+                wait(0.18)
+                DropdownFrame.Visible = false
+            else
+                DropdownFrame.Visible = true
+                TweenService:Create(DropdownFrame, tInfo, {Size = UDim2.new(0,182,0,math.min(27*#DropdownFrame:GetChildren(), 162))}):Play()
+                TweenService:Create(DownSign, tInfo, {Rotation = 180}):Play()
+            end
+        end
+
+        Dropdown.MouseButton1Up:Connect(function()
+            -- hide other dropdowns
+            for i, v in pairs(dropdowns) do
+                if v ~= DropdownFrame then
+                    if v.Visible then
+                        TweenService:Create(v, TweenInfo.new(0.12), {Size = UDim2.new(0,182,0,0)}):Play()
+                        v.Visible = false
+                    end
+                end
+            end
+            toggleDropdown()
+        end)
+
         function dropFunctions:Button(name)
             local name = name or ""
             local Button_2 = Instance.new("TextButton")
@@ -751,27 +823,26 @@ function library:Window(name)
             Button_2.BorderColor3 = currentTheme.ButtonBorder
             Button_2.Position = UDim2.new(0, 6, 0, canvasSize + 1)
             Button_2.Size = UDim2.new(0, 170, 0, 26)
-            Button_2.Selected = true
             Button_2.Font = Enum.Font.SourceSans
             Button_2.TextColor3 = currentTheme.Text
-            Button_2.TextSize = 16.000
-            Button_2.TextStrokeTransparency = 123.000
+            Button_2.TextSize = 16
             Button_2.ZIndex = 6 + zindex
             Button_2.Text = name
             Button_2.TextWrapped = true
+            addCornerAndStroke(Button_2, 6, 0)
             canvasSize = canvasSize + 27
             DropdownFrame.CanvasSize = UDim2.new(0, 182, 0, canvasSize + 1)
             if #DropdownFrame:GetChildren() < 8 then
-            DropdownFrame.Size = UDim2.new(0, 182, 0, DropdownFrame.Size.Y.Offset + 27)
+                DropdownFrame.Size = UDim2.new(0, 182, 0, DropdownFrame.Size.Y.Offset + 27)
             end
             Button_2.MouseButton1Up:Connect(function()
                 callback(name)
-		        DropdownFrame.Visible = false
-		        if selective then
-		           Dropdown.Text = name
-		        end
+                -- collapse animated
+                toggleDropdown()
+                if selective then Dropdown.Text = name end
             end)
         end
+
         function dropFunctions:Remove(name)
             local foundIt
             for i, v in pairs(DropdownFrame:GetChildren()) do
@@ -788,18 +859,14 @@ function library:Window(name)
                     end
                 end
             end
-            if not foundIt then
-                warn("The button you tried to remove didn't exist!")
-            end
+            if not foundIt then warn("The button you tried to remove didn't exist!") end
         end
 
-        for i,v in pairs(buttons) do
-            dropFunctions:Button(v)
-        end
-
+        for i,v in pairs(buttons) do dropFunctions:Button(v) end
         return dropFunctions
     end
 
+    -- ColorPicker (kept original behavior but with small visual helpers)
     function functions:ColorPicker(name, default, callback)
         local callback = callback or function() end
 
@@ -824,7 +891,6 @@ function library:Window(name)
 
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
-
         listOffset[winCount] = listOffset[winCount] + 32
 
         ColorPicker.Name = "ColorPicker"
@@ -834,29 +900,24 @@ function library:Window(name)
         ColorPicker.Font = Enum.Font.SourceSans
         ColorPicker.Text = ""
         ColorPicker.TextColor3 = currentTheme.Text
-        ColorPicker.TextSize = 14.000
+        ColorPicker.TextSize = 14
         ColorPicker.ZIndex = 2 + zindex
+        addCornerAndStroke(ColorPicker, 6, 0)
+
         ColorPicker.MouseButton1Up:Connect(function()
-            for i, v in pairs(colorPickers) do
-                v.Visible = false
-            end
+            for i, v in pairs(colorPickers) do v.Visible = false end
             ColorPickerFrame.Visible = not ColorPickerFrame.Visible
         end)
 
-        PickerCorner.Parent = ColorPicker
-        PickerCorner.Name = "PickerCorner"
-        PickerCorner.CornerRadius = UDim.new(0,2)
-
         PickerDescription.Name = "PickerDescription"
         PickerDescription.Parent = ColorPicker
-        PickerDescription.BackgroundColor3 = currentTheme.Window
-        PickerDescription.BackgroundTransparency = 1.000
+        PickerDescription.BackgroundTransparency = 1
         PickerDescription.Position = UDim2.new(-2.15789509, 0, 0, 0)
         PickerDescription.Size = UDim2.new(0, 116, 0, 26)
         PickerDescription.Font = Enum.Font.SourceSans
         PickerDescription.Text = name or "Color picker"
         PickerDescription.TextColor3 = currentTheme.Text
-        PickerDescription.TextSize = 16.000
+        PickerDescription.TextSize = 16
         PickerDescription.TextXAlignment = Enum.TextXAlignment.Left
         PickerDescription.ZIndex = 2 + zindex
 
@@ -868,6 +929,7 @@ function library:Window(name)
         ColorPickerFrame.Size = UDim2.new(0, 158, 0, 155)
         ColorPickerFrame.ZIndex = 3 + zindex
         ColorPickerFrame.Visible = false
+        addCornerAndStroke(ColorPickerFrame, 6, 0)
 
         ToggleRGB.Name = "ToggleRGB"
         ToggleRGB.Parent = ColorPickerFrame
@@ -878,8 +940,9 @@ function library:Window(name)
         ToggleRGB.Font = Enum.Font.SourceSans
         ToggleRGB.Text = ""
         ToggleRGB.TextColor3 = currentTheme.Text
-        ToggleRGB.TextSize = 14.000
+        ToggleRGB.TextSize = 14
         ToggleRGB.ZIndex = 4 + zindex
+        addCornerAndStroke(ToggleRGB, 4, 0)
 
         ToggleFiller_2.Name = "ToggleFiller"
         ToggleFiller_2.Parent = ToggleRGB
@@ -889,16 +952,16 @@ function library:Window(name)
         ToggleFiller_2.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller_2.ZIndex = 4 + zindex
         ToggleFiller_2.Visible = false
+        addCornerAndStroke(ToggleFiller_2, 4, 0)
 
         TextLabel.Parent = ToggleRGB
-        TextLabel.BackgroundColor3 = currentTheme.Window
-        TextLabel.BackgroundTransparency = 1.000
+        TextLabel.BackgroundTransparency = 1
         TextLabel.Position = UDim2.new(-5.13636351, 0, 0, 0)
         TextLabel.Size = UDim2.new(0, 106, 0, 22)
         TextLabel.Font = Enum.Font.SourceSans
         TextLabel.Text = "Rainbow"
         TextLabel.TextColor3 = currentTheme.Text
-        TextLabel.TextSize = 16.000
+        TextLabel.TextSize = 16
         TextLabel.TextXAlignment = Enum.TextXAlignment.Left
         TextLabel.ZIndex = 4 + zindex
 
@@ -911,41 +974,77 @@ function library:Window(name)
         ClosePicker.Font = Enum.Font.SourceSans
         ClosePicker.Text = "X"
         ClosePicker.TextColor3 = currentTheme.Text
-        ClosePicker.TextSize = 18.000
+        ClosePicker.TextSize = 18
         ClosePicker.ZIndex = 4 + zindex
+        addCornerAndStroke(ClosePicker, 4, 0)
         ClosePicker.MouseButton1Down:Connect(function()
             ColorPickerFrame.Visible = not ColorPickerFrame.Visible
         end)
 
-        CanvasGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
-        CanvasGradient.Name = "CanvasGradient"
+        -- Canvas (color selection)
+        Canvas.Name = "Canvas"
+        Canvas.Parent = ColorPickerFrame
+        Canvas.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        Canvas.Position = UDim2.new(0, 5, 0, 34)
+        Canvas.Size = UDim2.new(0, 148, 0, 64)
+        Canvas.ZIndex = 4 + zindex
+        addCornerAndStroke(Canvas, 4, 0)
+
+        CanvasGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255,0,0)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255,255,255))}
         CanvasGradient.Parent = Canvas
 
         BlackOverlay.Name = "BlackOverlay"
         BlackOverlay.Parent = Canvas
-        BlackOverlay.BackgroundColor3 = currentTheme.Window
-        BlackOverlay.BackgroundTransparency = 1.000
+        BlackOverlay.BackgroundTransparency = 1
         BlackOverlay.Size = UDim2.new(1, 0, 1, 0)
         BlackOverlay.Image = "rbxassetid://5107152095"
         BlackOverlay.ZIndex = 5 + zindex
 
-        UICorner.Parent = Canvas
-        UICorner.Name = "UICorner"
-        UICorner.CornerRadius = UDim.new(0,2)
-
         Cursor.Name = "Cursor"
         Cursor.Parent = Canvas
-        Cursor.BackgroundColor3 = currentTheme.Window
-        Cursor.BackgroundTransparency = 1.000
+        Cursor.BackgroundTransparency = 1
         Cursor.Size = UDim2.new(0, 8, 0, 8)
         Cursor.Image = "rbxassetid://5100115962"
         Cursor.ZIndex = 5 + zindex
 
+        local ColorFrame = Instance.new("Frame")
+        ColorFrame.Name = "Color"
+        ColorFrame.Parent = ColorPickerFrame
+        ColorFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        ColorFrame.Position = UDim2.new(0, 5, 0, 105)
+        ColorFrame.Size = UDim2.new(0, 148, 0, 14)
+        ColorFrame.BorderMode = Enum.BorderMode.Inset
+        ColorFrame.ZIndex = 4 + zindex
+        addCornerAndStroke(ColorFrame, 2, 0)
+
+        ColorGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)),
+            ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
+            ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)),
+            ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)),
+            ColorSequenceKeypoint.new(0.82, Color3.fromRGB(255, 0, 255)),
+            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
+        })
+        ColorGradient.Parent = ColorFrame
+
+        Title.Name = "Title"
+        Title.Parent = ColorPickerFrame
+        Title.BackgroundTransparency = 1
+        Title.Position = UDim2.new(0, 10, 0, 5)
+        Title.Size = UDim2.new(0, 118, 0, 21)
+        Title.Font = Enum.Font.SourceSans
+        Title.Text = name or "Color picker"
+        Title.TextColor3 = currentTheme.Text
+        Title.TextSize = 16
+        Title.TextXAlignment = Enum.TextXAlignment.Left
+        Title.ZIndex = 4 + zindex
+
+        -- color logic (kept behaviour)
         local draggingColor = false
         local hue = 0
         local sat = 1
         local brightness = 1
-        
         local con
 
         ToggleRGB.MouseButton1Down:Connect(function()
@@ -954,7 +1053,7 @@ function library:Window(name)
                 con = stepped:Connect(function()
                     if ToggleFiller_2.Visible then
                         local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
+                        local color3 = Color3.fromHSV(hue2, 1, 1)
                         callback(color3, true)
                         ColorPicker.BackgroundColor3 = color3
                     else
@@ -963,14 +1062,14 @@ function library:Window(name)
                 end)
             end
         end)
-        
+
         if default and type(default) == "boolean" then
             ToggleFiller_2.Visible = true
             if ToggleFiller_2.Visible then
                 con = stepped:Connect(function()
                     if ToggleFiller_2.Visible then
                         local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
+                        local color3 = Color3.fromHSV(hue2, 1, 1)
                         callback(color3)
                         ColorPicker.BackgroundColor3 = color3
                     else
@@ -982,144 +1081,89 @@ function library:Window(name)
             ColorPicker.BackgroundColor3 = default or currentTheme.Primary
         end
 
-        Canvas.Name = "Canvas"
-        Canvas.Parent = ColorPickerFrame
-        Canvas.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Canvas.Position = UDim2.new(0, 5, 0, 34)
-        Canvas.Size = UDim2.new(0, 148, 0, 64)
-        Canvas.ZIndex = 4 + zindex
+        -- Canvas interaction
         local canvasSize, canvasPosition = Canvas.AbsoluteSize, Canvas.AbsolutePosition
         Canvas.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 local initial = Vector2.new(Cursor.Position.X.Offset, Cursor.Position.Y.Offset)
                 local delta = Cursor.AbsolutePosition - initial
-                local con;
-                local isdragging = true
+                local innerCon
+                local isdraggingCanvas = true
 
-                con = stepped:Connect(function()
-                    if isdragging then
+                innerCon = stepped:Connect(function()
+                    if isdraggingCanvas then
                         local delta2 = Vector2.new(mouse.X, mouse.Y) - delta
                         local x = math.clamp(delta2.X, 2, Canvas.Size.X.Offset - 2)
                         local y = math.clamp(delta2.Y, 2, Canvas.Size.Y.Offset - 2)
-                        
-				        sat = 1 - math.clamp((mouse.X - canvasPosition.X) / canvasSize.X, 0, 1)
-				        brightness = 1 - math.clamp((mouse.Y - canvasPosition.Y) / canvasSize.Y, 0, 1)
-				
-                        color3 = Color3.fromHSV(hue, sat, brightness)
-                        
+                        sat = 1 - math.clamp((mouse.X - canvasPosition.X) / canvasSize.X, 0, 1)
+                        brightness = 1 - math.clamp((mouse.Y - canvasPosition.Y) / canvasSize.Y, 0, 1)
+                        local color3 = Color3.fromHSV(hue, sat, brightness)
                         Cursor.Position = UDim2.fromOffset(x - 4, y - 4)
                         ColorPicker.BackgroundColor3 = color3
                         callback(color3)
-					else
-						con:Disconnect();
-					end;
-                end);
+                    else
+                        innerCon:Disconnect()
+                    end
+                end)
                 input.Changed:Connect(function()
-    			    if input.UserInputState == Enum.UserInputState.End then
-					    isdragging = false;
-				    end;
-			    end);
-		    end;
-	    end);
-
-        Color.Name = "Color"
-        Color.Parent = ColorPickerFrame
-        Color.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        Color.Position = UDim2.new(0, 5, 0, 105)
-        Color.Size = UDim2.new(0, 148, 0, 14)
-        Color.BorderMode = Enum.BorderMode.Inset
-        Color.ZIndex = 4 + zindex
-        Color.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                draggingColor = true
-                local initial2 = ColorSlider.Position.X.Offset;
-                local delta1 = ColorSlider.AbsolutePosition.X - initial2
-                local con
-                con = stepped:Connect(function()
-                if draggingColor then
-                    -- gets the position of the mouse on the color thing and divides it by its size, which will give u the hue
-                    local colorPosition, colorSize = Color.AbsolutePosition, Color.AbsoluteSize
-                    hue = 1 - math.clamp(1 - ((mouse.X - colorPosition.X) / colorSize.X), 0, 1)
-                    CanvasGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromHSV(hue, 1, 1)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 255, 255))}
-
-                    local xOffset = math.clamp(mouse.X - delta1, 0, Color.Size.X.Offset - 3)
-                    ColorSlider.Position = UDim2.new(0, xOffset, 0, 0);
-
-                    color3 = Color3.fromHSV(hue, sat, brightness)
-                    ColorPicker.BackgroundColor3  = color3
-                    callback(color3)
-                else
-                    con:Disconnect()
-                end
-            end)
+                    if input.UserInputState == Enum.UserInputState.End then
+                        isdraggingCanvas = false
+                    end
+                end)
             end
         end)
-        Color.InputEnded:Connect(function(input)
+
+        ColorFrame.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingColor = false
+                local draggingColorLocal = true
+                local initial2 = ColorSlider.Position and ColorSlider.Position.X.Offset or 0
+                local delta1 = ColorSlider.AbsolutePosition and ColorSlider.AbsolutePosition.X - initial2 or 0
+                local innerCon
+                innerCon = stepped:Connect(function()
+                    if draggingColorLocal then
+                        local colorPosition, colorSize = ColorFrame.AbsolutePosition, ColorFrame.AbsoluteSize
+                        hue = 1 - math.clamp(1 - ((mouse.X - colorPosition.X) / colorSize.X), 0, 1)
+                        CanvasGradient.Color = ColorSequence.new{ColorSequenceKeypoint.new(0.00, Color3.fromHSV(hue, 1, 1)), ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255,255,255))}
+                        local xOffset = math.clamp(mouse.X - delta1, 0, ColorFrame.Size.X.Offset - 3)
+                        if ColorSlider then ColorSlider.Position = UDim2.new(0, xOffset, 0, 0) end
+                        local color3 = Color3.fromHSV(hue, sat, brightness)
+                        ColorPicker.BackgroundColor3  = color3
+                        callback(color3)
+                    else
+                        innerCon:Disconnect()
+                    end
+                end)
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then draggingColorLocal = false end
+                end)
             end
         end)
-        ColorGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0.00, Color3.fromRGB(255, 0, 0)), 
-            ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)), 
-            ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)), 
-            ColorSequenceKeypoint.new(0.50, Color3.fromRGB(0, 255, 255)), 
-            ColorSequenceKeypoint.new(0.66, Color3.fromRGB(0, 0, 255)), 
-            ColorSequenceKeypoint.new(0.82, Color3.fromRGB(255, 0, 255)), 
-            ColorSequenceKeypoint.new(1.00, Color3.fromRGB(255, 0, 0))
-        })
-        ColorGradient.Name = "ColorGradient"
-        ColorGradient.Parent = Color
 
-        ColorCorner.Parent = Color
-        ColorCorner.Name = "ColorCorner"
-        ColorCorner.CornerRadius = UDim.new(0,2)
+        table.insert(colorPickers, ColorPickerFrame)
 
-        ColorSlider.Name = "ColorSlider"
-        ColorSlider.Parent = Color
-        ColorSlider.BackgroundColor3 = currentTheme.Text
-        ColorSlider.BorderColor3 = currentTheme.Text
-        ColorSlider.Size = UDim2.new(0, 2, 0, 14)
-        ColorSlider.ZIndex = 5 + zindex
-
-        Title.Name = "Title"
-        Title.Parent = ColorPickerFrame
-        Title.BackgroundColor3 = currentTheme.Window
-        Title.BackgroundTransparency = 1.000
-        Title.Position = UDim2.new(0, 10, 0, 5)
-        Title.Size = UDim2.new(0, 118, 0, 21)
-        Title.Font = Enum.Font.SourceSans
-        Title.Text = name or "Color picker"
-        Title.TextColor3 = currentTheme.Text
-        Title.TextSize = 16.000
-        Title.TextXAlignment = Enum.TextXAlignment.Left
-        Title.ZIndex = 4 + zindex
-
-	    table.insert(colorPickers, ColorPickerFrame)
-
-	    local colorFuncs = {}
+        local colorFuncs = {}
         function colorFuncs:UpdateColorPicker(color)
             if type(color) == "userdata" then
                 ToggleFiller_2.Visible = false
-	            ColorPicker.BackgroundColor3 = color
+                ColorPicker.BackgroundColor3 = color
             elseif color and type(color) == "boolean" and not con then
-	            ToggleFiller_2.Visible = true
+                ToggleFiller_2.Visible = true
                 con = stepped:Connect(function()
                     if ToggleFiller_2.Visible then
                         local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
+                        local color3 = Color3.fromHSV(hue2, 1, 1)
                         callback(color3)
                         ColorPicker.BackgroundColor3 = color3
                     else
                         con:Disconnect()
                     end
                 end)
-	        end
-	    end
-	    return colorFuncs
+            end
+        end
+        return colorFuncs
     end
 
-    return functions
+    return setmetatable(functions, functions)
 end
 
 return library
