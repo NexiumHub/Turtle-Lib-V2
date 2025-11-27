@@ -1,5 +1,3 @@
-[file name]: Source.lua
-[file content begin]
 -- Updated Turtle UI Lib with Theme Support and Rounded Corners
 -- Adds built-in themes: Dark, MatrixGreen, NeonBlue, GlassDark, AestheticPink
 -- Backwards compatible with original API.
