@@ -1,7 +1,9 @@
+[file name]: Source.lua
+[file content begin]
 -- Updated Turtle UI Lib with Theme Support and Rounded Corners
 -- Adds built-in themes: Dark, MatrixGreen, NeonBlue, GlassDark, AestheticPink
+-- Adds rounded corners support with customizable corner radius
 -- Backwards compatible with original API.
---https://raw.githubusercontent.com/NexiumHub/Turtle-Lib-V2/refs/heads/main/Source.lua
 
 local library = {}
 local windowCount = 0
@@ -81,6 +83,16 @@ protect_gui(TurtleUiLib)
 local xOffset = 20
 local uis = game:GetService("UserInputService")
 local keybindConnection
+
+-- ROUNDED CORNERS CONFIG
+local CornerRadius = {
+    Small = UDim.new(0, 4),
+    Medium = UDim.new(0, 6),
+    Large = UDim.new(0, 8),
+    ExtraLarge = UDim.new(0, 12)
+}
+
+local currentCornerRadius = CornerRadius.Medium
 
 -- THEME ENGINE
 local Themes = {
@@ -182,6 +194,18 @@ local function resolveThemeInput(v)
     end
 end
 
+-- Apply rounded corners to an instance
+local function applyRoundedCorners(instance, radius)
+    if radius == nil then
+        radius = currentCornerRadius
+    end
+    
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = radius
+    corner.Parent = instance
+    return corner
+end
+
 -- Apply theme to existing UI elements (best-effort)
 local function applyThemeToExisting(theme)
     -- update many common names used in the UI
@@ -224,6 +248,43 @@ local function applyThemeToExisting(theme)
     end
 end
 
+-- Rounded corners API
+function library:SetCornerRadius(radius)
+    if type(radius) == "string" and CornerRadius[radius] then
+        currentCornerRadius = CornerRadius[radius]
+    elseif type(radius) == "userdata" and radius.ClassName == "UDim" then
+        currentCornerRadius = radius
+    elseif type(radius) == "number" then
+        currentCornerRadius = UDim.new(0, radius)
+    end
+    
+    -- Apply rounded corners to all existing UI elements
+    for _, obj in ipairs(TurtleUiLib:GetDescendants()) do
+        if (obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("ImageButton") or obj:IsA("TextButton")) and obj.Name ~= "Cursor" then
+            -- Remove existing corners
+            for _, child in ipairs(obj:GetChildren()) do
+                if child:IsA("UICorner") then
+                    child:Destroy()
+                end
+            end
+            -- Apply new corners
+            applyRoundedCorners(obj, currentCornerRadius)
+        end
+    end
+end
+
+function library:GetCornerRadius()
+    return currentCornerRadius
+end
+
+function library:ListCornerSizes()
+    local names = {}
+    for k, _ in pairs(CornerRadius) do
+        table.insert(names, k)
+    end
+    return names
+end
+
 function library:SetTheme(themeInput)
     local t = resolveThemeInput(themeInput)
     currentTheme = t
@@ -245,6 +306,7 @@ end
 
 -- expose Themes so user can copy/modify
 library.Themes = Themes
+library.CornerRadius = CornerRadius
 
 -- default theme
 library:SetTheme("Dark")
@@ -256,6 +318,7 @@ function library:Destroy()
         keybindConnection:Disconnect()
     end
 end
+
 function library:Hide()
    TurtleUiLib.Enabled = not TurtleUiLib.Enabled
 end	
@@ -285,10 +348,8 @@ function library:Window(name)
     UiWindow.ZIndex = 4 + zindex
     UiWindow.Active = true
     
-    local UiWindowCorner = Instance.new("UICorner")
-    UiWindowCorner.CornerRadius = UDim.new(0, 8)
-    UiWindowCorner.Parent = UiWindow
-    
+    -- Apply rounded corners to main window
+    applyRoundedCorners(UiWindow)
     Dragify(UiWindow)
 
     xOffset = xOffset + 230
@@ -302,9 +363,10 @@ function library:Window(name)
     Header.Size = UDim2.new(0, 207, 0, 26)
     Header.ZIndex = 5 + zindex
     
-    local HeaderCorner = Instance.new("UICorner")
-    HeaderCorner.CornerRadius = UDim.new(0, 8)
-    HeaderCorner.Parent = Header
+    -- Apply rounded corners to header (top only)
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, currentCornerRadius.Offset)
+    headerCorner.Parent = Header
 
     local HeaderText = Instance.new("TextLabel")
     HeaderText.Name = "HeaderText"
@@ -333,9 +395,8 @@ function library:Window(name)
     Minimise.TextColor3 = currentTheme.Text
     Minimise.TextSize = 20.000
     
-    local MinimiseCorner = Instance.new("UICorner")
-    MinimiseCorner.CornerRadius = UDim.new(0, 6)
-    MinimiseCorner.Parent = Minimise
+    -- Apply rounded corners to minimize button
+    applyRoundedCorners(Minimise, UDim.new(0, 3))
     
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
@@ -354,9 +415,10 @@ function library:Window(name)
     Window.Size = UDim2.new(0, 207, 0, 33)
     Window.ZIndex = 1 + zindex
     
-    local WindowCorner = Instance.new("UICorner")
-    WindowCorner.CornerRadius = UDim.new(0, 8)
-    WindowCorner.Parent = Window
+    -- Apply rounded corners to content window (bottom only)
+    local windowCorner = Instance.new("UICorner")
+    windowCorner.CornerRadius = UDim.new(0, currentCornerRadius.Offset)
+    windowCorner.Parent = Window
 
     local functions = {}
     functions.__index = functions
@@ -393,9 +455,8 @@ function library:Window(name)
         Button.TextWrapped = true
         Button.Text = name
         
-        local ButtonCorner = Instance.new("UICorner")
-        ButtonCorner.CornerRadius = UDim.new(0, 6)
-        ButtonCorner.Parent = Button
+        -- Apply rounded corners to button
+        applyRoundedCorners(Button)
         
         Button.MouseButton1Down:Connect(callback)
 
@@ -475,9 +536,8 @@ function library:Window(name)
         ToggleButton.TextSize = 14.000
         ToggleButton.ZIndex = 2 + zindex
         
-        local ToggleButtonCorner = Instance.new("UICorner")
-        ToggleButtonCorner.CornerRadius = UDim.new(0, 6)
-        ToggleButtonCorner.Parent = ToggleButton
+        -- Apply rounded corners to toggle button
+        applyRoundedCorners(ToggleButton, UDim.new(0, 4))
         
         ToggleButton.MouseButton1Up:Connect(function()
             ToggleFiller.Visible = not ToggleFiller.Visible
@@ -493,9 +553,8 @@ function library:Window(name)
         ToggleFiller.Visible = on
         ToggleFiller.ZIndex = 2 + zindex
         
-        local ToggleFillerCorner = Instance.new("UICorner")
-        ToggleFillerCorner.CornerRadius = UDim.new(0, 4)
-        ToggleFillerCorner.Parent = ToggleFiller
+        -- Apply rounded corners to toggle filler
+        applyRoundedCorners(ToggleFiller, UDim.new(0, 3))
         
         pastSliders[winCount] = false
     end
@@ -523,9 +582,8 @@ function library:Window(name)
         TextBox.TextStrokeColor3 = currentTheme.Text
         TextBox.ZIndex = 2 + zindex
         
-        local TextBoxCorner = Instance.new("UICorner")
-        TextBoxCorner.CornerRadius = UDim.new(0, 6)
-        TextBoxCorner.Parent = TextBox
+        -- Apply rounded corners to text box
+        applyRoundedCorners(TextBox)
         
         TextBox:GetPropertyChangedSignal('Text'):connect(function()
             callback(TextBox.Text, false)
@@ -627,9 +685,8 @@ function library:Window(name)
         Slider.Size = UDim2.new(0, 180, 0, 6)
         Slider.ZIndex = 2 + zindex
         
-        local SliderCorner = Instance.new("UICorner")
-        SliderCorner.CornerRadius = UDim.new(0, 3)
-        SliderCorner.Parent = Slider
+        -- Apply rounded corners to slider track
+        applyRoundedCorners(Slider, UDim.new(1, 0))
         
         Slider.InputBegan:Connect(SliderMovement) 
         Slider.InputEnded:Connect(SliderEnd)      
@@ -642,9 +699,8 @@ function library:Window(name)
         SliderButton.Size = UDim2.new(0, 6, 0, 22)
         SliderButton.ZIndex = 3 + zindex
         
-        local SliderButtonCorner = Instance.new("UICorner")
-        SliderButtonCorner.CornerRadius = UDim.new(0, 3)
-        SliderButtonCorner.Parent = SliderButton
+        -- Apply rounded corners to slider button
+        applyRoundedCorners(SliderButton, UDim.new(1, 0))
         
         SliderButton.InputBegan:Connect(SliderMovement)
         SliderButton.InputEnded:Connect(SliderEnd)    
@@ -680,9 +736,8 @@ function library:Window(name)
         SilderFiller.ZIndex = 2 + zindex
         SilderFiller.BorderMode = Enum.BorderMode.Inset
         
-        local SilderFillerCorner = Instance.new("UICorner")
-        SilderFillerCorner.CornerRadius = UDim.new(0, 3)
-        SilderFillerCorner.Parent = SilderFiller
+        -- Apply rounded corners to slider filler
+        applyRoundedCorners(SilderFiller, UDim.new(1, 0))
 
         Min.Name = "Min"
         Min.Parent = Slider
@@ -724,8 +779,7 @@ function library:Window(name)
 
     function functions:Dropdown(text, buttons, callback, selective)
         local text = text or "Dropdown"
-        local buttons = buttons or {}
-        local callback = callback or function() end
+        local buttons = buttons or {}        local callback = callback or function() callback() end
 
         local Dropdown = Instance.new("TextButton")
         local DownSign = Instance.new("TextLabel")
@@ -751,9 +805,8 @@ function library:Window(name)
         Dropdown.TextWrapped = true
         Dropdown.ZIndex = 3 + zindex
         
-        local DropdownCorner = Instance.new("UICorner")
-        DropdownCorner.CornerRadius = UDim.new(0, 6)
-        DropdownCorner.Parent = Dropdown
+        -- Apply rounded corners to dropdown
+        applyRoundedCorners(Dropdown)
         
         Dropdown.MouseButton1Up:Connect(function()
             for i, v in pairs(dropdowns) do
@@ -798,9 +851,8 @@ function library:Window(name)
         DropdownFrame.ScrollingDirection = Enum.ScrollingDirection.Y
         DropdownFrame.ScrollBarImageColor3 = currentTheme.Text
         
-        local DropdownFrameCorner = Instance.new("UICorner")
-        DropdownFrameCorner.CornerRadius = UDim.new(0, 6)
-        DropdownFrameCorner.Parent = DropdownFrame
+        -- Apply rounded corners to dropdown frame
+        applyRoundedCorners(DropdownFrame)
         
         table.insert(dropdowns, DropdownFrame)
         local dropFunctions = {}
@@ -823,9 +875,8 @@ function library:Window(name)
             Button_2.Text = name
             Button_2.TextWrapped = true
             
-            local Button2Corner = Instance.new("UICorner")
-            Button2Corner.CornerRadius = UDim.new(0, 4)
-            Button2Corner.Parent = Button_2
+            -- Apply rounded corners to dropdown buttons
+            applyRoundedCorners(Button_2, UDim.new(0, 3))
             
             canvasSize = canvasSize + 27
             DropdownFrame.CanvasSize = UDim2.new(0, 182, 0, canvasSize + 1)
@@ -905,9 +956,8 @@ function library:Window(name)
         ColorPicker.TextSize = 14.000
         ColorPicker.ZIndex = 2 + zindex
         
-        PickerCorner.Parent = ColorPicker
-        PickerCorner.Name = "PickerCorner"
-        PickerCorner.CornerRadius = UDim.new(0, 6)
+        -- Apply rounded corners to color picker button
+        applyRoundedCorners(ColorPicker)
         
         ColorPicker.MouseButton1Up:Connect(function()
             for i, v in pairs(colorPickers) do
@@ -915,6 +965,10 @@ function library:Window(name)
             end
             ColorPickerFrame.Visible = not ColorPickerFrame.Visible
         end)
+
+        PickerCorner.Parent = ColorPicker
+        PickerCorner.Name = "PickerCorner"
+        PickerCorner.CornerRadius = UDim.new(0,2)
 
         PickerDescription.Name = "PickerDescription"
         PickerDescription.Parent = ColorPicker
@@ -938,9 +992,8 @@ function library:Window(name)
         ColorPickerFrame.ZIndex = 3 + zindex
         ColorPickerFrame.Visible = false
         
-        local ColorPickerFrameCorner = Instance.new("UICorner")
-        ColorPickerFrameCorner.CornerRadius = UDim.new(0, 8)
-        ColorPickerFrameCorner.Parent = ColorPickerFrame
+        -- Apply rounded corners to color picker frame
+        applyRoundedCorners(ColorPickerFrame)
 
         ToggleRGB.Name = "ToggleRGB"
         ToggleRGB.Parent = ColorPickerFrame
@@ -954,9 +1007,8 @@ function library:Window(name)
         ToggleRGB.TextSize = 14.000
         ToggleRGB.ZIndex = 4 + zindex
         
-        local ToggleRGBCorner = Instance.new("UICorner")
-        ToggleRGBCorner.CornerRadius = UDim.new(0, 4)
-        ToggleRGBCorner.Parent = ToggleRGB
+        -- Apply rounded corners to RGB toggle
+        applyRoundedCorners(ToggleRGB, UDim.new(0, 4))
 
         ToggleFiller_2.Name = "ToggleFiller"
         ToggleFiller_2.Parent = ToggleRGB
@@ -967,9 +1019,8 @@ function library:Window(name)
         ToggleFiller_2.ZIndex = 4 + zindex
         ToggleFiller_2.Visible = false
         
-        local ToggleFiller2Corner = Instance.new("UICorner")
-        ToggleFiller2Corner.CornerRadius = UDim.new(0, 3)
-        ToggleFiller2Corner.Parent = ToggleFiller_2
+        -- Apply rounded corners to RGB toggle filler
+        applyRoundedCorners(ToggleFiller_2, UDim.new(0, 3))
 
         TextLabel.Parent = ToggleRGB
         TextLabel.BackgroundColor3 = currentTheme.Window
@@ -995,9 +1046,8 @@ function library:Window(name)
         ClosePicker.TextSize = 18.000
         ClosePicker.ZIndex = 4 + zindex
         
-        local ClosePickerCorner = Instance.new("UICorner")
-        ClosePickerCorner.CornerRadius = UDim.new(0, 4)
-        ClosePickerCorner.Parent = ClosePicker
+        -- Apply rounded corners to close button
+        applyRoundedCorners(ClosePicker, UDim.new(0, 3))
         
         ClosePicker.MouseButton1Down:Connect(function()
             ColorPickerFrame.Visible = not ColorPickerFrame.Visible
@@ -1017,7 +1067,7 @@ function library:Window(name)
 
         UICorner.Parent = Canvas
         UICorner.Name = "UICorner"
-        UICorner.CornerRadius = UDim.new(0, 6)
+        UICorner.CornerRadius = UDim.new(0,2)
 
         Cursor.Name = "Cursor"
         Cursor.Parent = Canvas
@@ -1027,53 +1077,16 @@ function library:Window(name)
         Cursor.Image = "rbxassetid://5100115962"
         Cursor.ZIndex = 5 + zindex
 
-        local draggingColor = false
-        local hue = 0
-        local sat = 1
-        local brightness = 1
-        
-        local con
-
-        ToggleRGB.MouseButton1Down:Connect(function()
-            ToggleFiller_2.Visible = not ToggleFiller_2.Visible
-            if ToggleFiller_2.Visible then
-                con = stepped:Connect(function()
-                    if ToggleFiller_2.Visible then
-                        local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
-                        callback(color3, true)
-                        ColorPicker.BackgroundColor3 = color3
-                    else
-                        con:Disconnect()
-                    end
-                end)
-            end
-        end)
-        
-        if default and type(default) == "boolean" then
-            ToggleFiller_2.Visible = true
-            if ToggleFiller_2.Visible then
-                con = stepped:Connect(function()
-                    if ToggleFiller_2.Visible then
-                        local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
-                        callback(color3)
-                        ColorPicker.BackgroundColor3 = color3
-                    else
-                        con:Disconnect()
-                    end
-                end)
-            end
-        else
-            ColorPicker.BackgroundColor3 = default or currentTheme.Primary
-        end
-
         Canvas.Name = "Canvas"
         Canvas.Parent = ColorPickerFrame
         Canvas.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         Canvas.Position = UDim2.new(0, 5, 0, 34)
         Canvas.Size = UDim2.new(0, 148, 0, 64)
         Canvas.ZIndex = 4 + zindex
+        
+        -- Apply rounded corners to color canvas
+        applyRoundedCorners(Canvas)
+        
         local canvasSize, canvasPosition = Canvas.AbsoluteSize, Canvas.AbsolutePosition
         Canvas.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1116,9 +1129,8 @@ function library:Window(name)
         Color.BorderMode = Enum.BorderMode.Inset
         Color.ZIndex = 4 + zindex
         
-        ColorCorner.Parent = Color
-        ColorCorner.Name = "ColorCorner"
-        ColorCorner.CornerRadius = UDim.new(0, 6)
+        -- Apply rounded corners to color spectrum
+        applyRoundedCorners(Color, UDim.new(1, 0))
         
         Color.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -1161,6 +1173,10 @@ function library:Window(name)
         })
         ColorGradient.Name = "ColorGradient"
         ColorGradient.Parent = Color
+
+        ColorCorner.Parent = Color
+        ColorCorner.Name = "ColorCorner"
+        ColorCorner.CornerRadius = UDim.new(0,2)
 
         ColorSlider.Name = "ColorSlider"
         ColorSlider.Parent = Color
