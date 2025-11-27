@@ -357,9 +357,9 @@ function library:Window(name)
     Header.Parent = UiWindow
     Header.BackgroundColor3 = currentTheme.Header
     Header.BorderColor3 = currentTheme.HeaderBorder
-    Header.Position = UDim2.new(0, 0, -0.0202544238, 0)
+    Header.Position = UDim2.new(0, 0, 0, 0)
     Header.Size = UDim2.new(0, 207, 0, 26)
-    Header.ZIndex = 5 + zindex
+    Header.ZIndex = 7 + zindex
     
     -- Apply rounded corners to header (top only)
     local headerCorner = Instance.new("UICorner")
@@ -371,9 +371,9 @@ function library:Window(name)
     HeaderText.Parent = Header
     HeaderText.BackgroundColor3 = currentTheme.Window
     HeaderText.BackgroundTransparency = 1.000
-    HeaderText.Position = UDim2.new(0, 0, -0.0020698905, 0)
+    HeaderText.Position = UDim2.new(0, 0, 0, 0)
     HeaderText.Size = UDim2.new(0, 206, 0, 33)
-    HeaderText.ZIndex = 6 + zindex
+    HeaderText.ZIndex = 8 + zindex
     HeaderText.Font = Enum.Font.SourceSans
     HeaderText.Text = name or "Window"
     HeaderText.TextColor3 = currentTheme.HeaderText
@@ -387,7 +387,7 @@ function library:Window(name)
     Minimise.BorderColor3 = currentTheme.HeaderBorder
     Minimise.Position = UDim2.new(0, 185, 0, 2)
     Minimise.Size = UDim2.new(0, 22, 0, 22)
-    Minimise.ZIndex = 7 + zindex
+    Minimise.ZIndex = 9 + zindex
     Minimise.Font = Enum.Font.SourceSansLight
     Minimise.Text = "_"
     Minimise.TextColor3 = currentTheme.Text
@@ -411,7 +411,7 @@ function library:Window(name)
     Window.BorderColor3 = currentTheme.WindowBorder
     Window.Position = UDim2.new(0, 0, 0, 0)
     Window.Size = UDim2.new(0, 207, 0, 33)
-    Window.ZIndex = 1 + zindex
+    Window.ZIndex = 4 + zindex
     
     -- Apply rounded corners to content window (bottom only)
     local windowCorner = Instance.new("UICorner")
