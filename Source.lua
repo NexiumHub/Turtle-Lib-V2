@@ -269,9 +269,6 @@ function library:Window(name)
     function functions:Toggle(text, on, callback)
         local callback = callback or function() end
 
-        local OFF_COLOR = Color3.fromRGB(47, 54, 64)
-        local ON_COLOR = Color3.fromRGB(68, 189, 50) -- The color of the filler
-
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
 
@@ -297,8 +294,8 @@ function library:Window(name)
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
-        -- UPDATED: Set initial background color based on 'on' state
-        ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR
+        -- FIX/CHANGE 1: Set initial background color based on 'on' state (the new green background).
+        ToggleButton.BackgroundColor3 = on and Color3.fromRGB(68, 189, 50) or Color3.fromRGB(47, 54, 64)
         ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
         ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
@@ -315,11 +312,11 @@ function library:Window(name)
         ToggleButton.MouseButton1Up:Connect(function()
             ToggleFiller.Visible = not ToggleFiller.Visible
             
-            -- UPDATED: Change ToggleButton background color on click
+            -- FIX/CHANGE 2: Update ToggleButton color dynamically on click.
             if ToggleFiller.Visible then
-                ToggleButton.BackgroundColor3 = ON_COLOR
+                ToggleButton.BackgroundColor3 = Color3.fromRGB(68, 189, 50) -- Green when ON
             else
-                ToggleButton.BackgroundColor3 = OFF_COLOR
+                ToggleButton.BackgroundColor3 = Color3.fromRGB(47, 54, 64) -- Dark Gray when OFF
             end
             
             callback(ToggleFiller.Visible)
@@ -327,7 +324,8 @@ function library:Window(name)
 
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
-        ToggleFiller.BackgroundColor3 = ON_COLOR -- Use the green color for the filler too
+        -- ToggleFiller remains as the small green dot (it will blend into the green background when ON).
+        ToggleFiller.BackgroundColor3 = Color3.fromRGB(68, 189, 50)
         ToggleFiller.BorderColor3 = Color3.fromRGB(47, 54, 64)
         ToggleFiller.Position = UDim2.new(0, 5, 0, 5)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
@@ -1043,4 +1041,7 @@ function library:Window(name)
 	return colorFuncs
     end
 
-    return library
+    return functions
+end
+
+return library
