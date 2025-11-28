@@ -294,8 +294,12 @@ function library:Window(name)
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
-        -- FIX/CHANGE 1: Set initial background color based on 'on' state (the new green background).
-        ToggleButton.BackgroundColor3 = on and Color3.fromRGB(68, 189, 50) or Color3.fromRGB(47, 54, 64)
+        
+        -- Use a darker color for the OFF state background
+        local ON_COLOR = Color3.fromRGB(47, 54, 64)
+        local OFF_COLOR = Color3.fromRGB(30, 34, 40)
+
+        ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR -- Initial color based on state
         ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
         ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
@@ -312,11 +316,11 @@ function library:Window(name)
         ToggleButton.MouseButton1Up:Connect(function()
             ToggleFiller.Visible = not ToggleFiller.Visible
             
-            -- FIX/CHANGE 2: Update ToggleButton color dynamically on click.
+            -- Change the button's background color when visibility changes
             if ToggleFiller.Visible then
-                ToggleButton.BackgroundColor3 = Color3.fromRGB(68, 189, 50) -- Green when ON
+                ToggleButton.BackgroundColor3 = ON_COLOR
             else
-                ToggleButton.BackgroundColor3 = Color3.fromRGB(47, 54, 64) -- Dark Gray when OFF
+                ToggleButton.BackgroundColor3 = OFF_COLOR
             end
             
             callback(ToggleFiller.Visible)
@@ -324,7 +328,6 @@ function library:Window(name)
 
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
-        -- ToggleFiller remains as the small green dot (it will blend into the green background when ON).
         ToggleFiller.BackgroundColor3 = Color3.fromRGB(68, 189, 50)
         ToggleFiller.BorderColor3 = Color3.fromRGB(47, 54, 64)
         ToggleFiller.Position = UDim2.new(0, 5, 0, 5)
