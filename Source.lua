@@ -106,6 +106,11 @@ function library:Window(name)
     local winCount = windowCount
     local zindex = winCount * 7
     local UiWindow = Instance.new("Frame")
+    -- ROUND CORNERS ADDED
+    local WindowCorner = Instance.new("UICorner")
+    WindowCorner.CornerRadius = UDim.new(0, 5)
+    WindowCorner.Parent = UiWindow
+    -- END ROUND CORNERS
 
     UiWindow.Name = "UiWindow"
     UiWindow.Parent = TurtleUiLib
@@ -120,6 +125,11 @@ function library:Window(name)
     xOffset = xOffset + 230
 
     local Header = Instance.new("Frame")
+    -- ROUND CORNERS ADDED
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 5)
+    HeaderCorner.Parent = Header
+    -- END ROUND CORNERS
     Header.Name = "Header"
     Header.Parent = UiWindow
     Header.BackgroundColor3 = Color3.fromRGB(0, 168, 255)
@@ -190,6 +200,11 @@ function library:Window(name)
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
 
         local Button = Instance.new("TextButton")
+        -- ROUND CORNERS ADDED
+        local ButtonCorner = Instance.new("UICorner")
+        ButtonCorner.CornerRadius = UDim.new(0, 5)
+        ButtonCorner.Parent = Button
+        -- END ROUND CORNERS
         listOffset[winCount] = listOffset[winCount] + 32
         Button.Name = "Button"
         Button.Parent = Window
@@ -281,6 +296,11 @@ function library:Window(name)
         ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleButton.TextSize = 14.000
         ToggleButton.ZIndex = 2 + zindex
+        -- ROUND CORNERS ADDED
+        local ToggleButtonCorner = Instance.new("UICorner")
+        ToggleButtonCorner.CornerRadius = UDim.new(0, 5)
+        ToggleButtonCorner.Parent = ToggleButton
+        -- END ROUND CORNERS
         ToggleButton.MouseButton1Up:Connect(function()
             ToggleFiller.Visible = not ToggleFiller.Visible
             callback(ToggleFiller.Visible)
@@ -294,6 +314,11 @@ function library:Window(name)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller.Visible = on
         ToggleFiller.ZIndex = 2 + zindex
+        -- ROUND CORNERS ADDED
+        local ToggleFillerCorner = Instance.new("UICorner")
+        ToggleFillerCorner.CornerRadius = UDim.new(0, 3)
+        ToggleFillerCorner.Parent = ToggleFiller
+        -- END ROUND CORNERS
         pastSliders[winCount] = false
     end
     function functions:Box(text, callback)
@@ -318,6 +343,11 @@ function library:Window(name)
         TextBox.TextSize = 16.000
         TextBox.TextStrokeColor3 = Color3.fromRGB(245, 246, 250)
         TextBox.ZIndex = 2 + zindex
+        -- ROUND CORNERS ADDED
+        local TextBoxCorner = Instance.new("UICorner")
+        TextBoxCorner.CornerRadius = UDim.new(0, 5)
+        TextBoxCorner.Parent = TextBox
+        -- END ROUND CORNERS
         TextBox:GetPropertyChangedSignal('Text'):connect(function()
             callback(TextBox.Text, false)
         end)
@@ -413,6 +443,11 @@ function library:Window(name)
         Slider.Position = UDim2.new(0, 13, 0, listOffset[winCount])
         Slider.Size = UDim2.new(0, 180, 0, 6)
         Slider.ZIndex = 2 + zindex
+        -- ROUND CORNERS ADDED
+        local SliderCorner = Instance.new("UICorner")
+        SliderCorner.CornerRadius = UDim.new(0, 3)
+        SliderCorner.Parent = Slider
+        -- END ROUND CORNERS
         Slider.InputBegan:Connect(SliderMovement) 
         Slider.InputEnded:Connect(SliderEnd)      
 
@@ -423,6 +458,11 @@ function library:Window(name)
         SliderButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
         SliderButton.Size = UDim2.new(0, 6, 0, 22)
         SliderButton.ZIndex = 3 + zindex
+        -- ROUND CORNERS ADDED
+        local SliderButtonCorner = Instance.new("UICorner")
+        SliderButtonCorner.CornerRadius = UDim.new(0, 3)
+        SliderButtonCorner.Parent = SliderButton
+        -- END ROUND CORNERS
         SliderButton.InputBegan:Connect(SliderMovement)
         SliderButton.InputEnded:Connect(SliderEnd)    
 
@@ -456,6 +496,11 @@ function library:Window(name)
         SilderFiller.Size = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), 0, 6)
         SilderFiller.ZIndex = 2 + zindex
         SilderFiller.BorderMode = Enum.BorderMode.Inset
+        -- ROUND CORNERS ADDED
+        local SliderFillerCorner = Instance.new("UICorner")
+        SliderFillerCorner.CornerRadius = UDim.new(0, 3)
+        SliderFillerCorner.Parent = SilderFiller
+        -- END ROUND CORNERS
 
         Min.Name = "Min"
         Min.Parent = Slider
@@ -522,6 +567,11 @@ function library:Window(name)
         Dropdown.TextStrokeTransparency = 123.000
         Dropdown.TextWrapped = true
         Dropdown.ZIndex = 3 + zindex
+        -- ROUND CORNERS ADDED
+        local DropdownCorner = Instance.new("UICorner")
+        DropdownCorner.CornerRadius = UDim.new(0, 5)
+        DropdownCorner.Parent = Dropdown
+        -- END ROUND CORNERS
         Dropdown.MouseButton1Up:Connect(function()
             for i, v in pairs(dropdowns) do
                 if v ~= DropdownFrame then
@@ -564,6 +614,11 @@ function library:Window(name)
         DropdownFrame.ZIndex = 5 + zindex
         DropdownFrame.ScrollingDirection = Enum.ScrollingDirection.Y
         DropdownFrame.ScrollBarImageColor3 = Color3.fromRGB(220, 221, 225)
+        -- ROUND CORNERS ADDED
+        local DropdownFrameCorner = Instance.new("UICorner")
+        DropdownFrameCorner.CornerRadius = UDim.new(0, 5)
+        DropdownFrameCorner.Parent = DropdownFrame
+        -- END ROUND CORNERS
         table.insert(dropdowns, DropdownFrame)
         local dropFunctions = {}
         local canvasSize = 0
@@ -584,6 +639,11 @@ function library:Window(name)
             Button_2.ZIndex = 6 + zindex
             Button_2.Text = name
             Button_2.TextWrapped = true
+            -- ROUND CORNERS ADDED
+            local DropdownButtonCorner = Instance.new("UICorner")
+            DropdownButtonCorner.CornerRadius = UDim.new(0, 5)
+            DropdownButtonCorner.Parent = Button_2
+            -- END ROUND CORNERS
             canvasSize = canvasSize + 27
             DropdownFrame.CanvasSize = UDim2.new(0, 182, 0, canvasSize + 1)
             if #DropdownFrame:GetChildren() < 8 then
@@ -669,7 +729,7 @@ function library:Window(name)
 
         PickerCorner.Parent = ColorPicker
         PickerCorner.Name = "PickerCorner"
-        PickerCorner.CornerRadius = UDim.new(0,2)
+        PickerCorner.CornerRadius = UDim.new(0,5) -- Standardized radius
 
         PickerDescription.Name = "PickerDescription"
         PickerDescription.Parent = ColorPicker
@@ -692,6 +752,12 @@ function library:Window(name)
         ColorPickerFrame.Size = UDim2.new(0, 158, 0, 155)
         ColorPickerFrame.ZIndex = 3 + zindex
         ColorPickerFrame.Visible = false
+        
+        -- ROUND CORNERS ADDED
+        local ColorPickerFrameCorner = Instance.new("UICorner")
+        ColorPickerFrameCorner.CornerRadius = UDim.new(0, 5)
+        ColorPickerFrameCorner.Parent = ColorPickerFrame
+        -- END ROUND CORNERS
 
         ToggleRGB.Name = "ToggleRGB"
         ToggleRGB.Parent = ColorPickerFrame
@@ -704,6 +770,11 @@ function library:Window(name)
         ToggleRGB.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleRGB.TextSize = 14.000
         ToggleRGB.ZIndex = 4 + zindex
+        -- ROUND CORNERS ADDED
+        local ToggleRGBCorner = Instance.new("UICorner")
+        ToggleRGBCorner.CornerRadius = UDim.new(0, 5)
+        ToggleRGBCorner.Parent = ToggleRGB
+        -- END ROUND CORNERS
 
         ToggleFiller_2.Name = "ToggleFiller"
         ToggleFiller_2.Parent = ToggleRGB
@@ -713,6 +784,11 @@ function library:Window(name)
         ToggleFiller_2.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller_2.ZIndex = 4 + zindex
         ToggleFiller_2.Visible = false
+        -- ROUND CORNERS ADDED
+        local ToggleFiller2Corner = Instance.new("UICorner")
+        ToggleFiller2Corner.CornerRadius = UDim.new(0, 3)
+        ToggleFiller2Corner.Parent = ToggleFiller_2
+        -- END ROUND CORNERS
 
         TextLabel.Parent = ToggleRGB
         TextLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
@@ -737,6 +813,11 @@ function library:Window(name)
         ClosePicker.TextColor3 = Color3.fromRGB(245, 246, 250)
         ClosePicker.TextSize = 18.000
         ClosePicker.ZIndex = 4 + zindex
+        -- ROUND CORNERS ADDED
+        local ClosePickerCorner = Instance.new("UICorner")
+        ClosePickerCorner.CornerRadius = UDim.new(0, 5)
+        ClosePickerCorner.Parent = ClosePicker
+        -- END ROUND CORNERS
         ClosePicker.MouseButton1Down:Connect(function()
             ColorPickerFrame.Visible = not ColorPickerFrame.Visible
         end)
@@ -755,7 +836,7 @@ function library:Window(name)
 
         UICorner.Parent = Canvas
         UICorner.Name = "UICorner"
-        UICorner.CornerRadius = UDim.new(0,2)
+        UICorner.CornerRadius = UDim.new(0,2) -- Keep Color Canvas radius small
 
         Cursor.Name = "Cursor"
         Cursor.Parent = Canvas
@@ -897,7 +978,7 @@ function library:Window(name)
 
         ColorCorner.Parent = Color
         ColorCorner.Name = "ColorCorner"
-        ColorCorner.CornerRadius = UDim.new(0,2)
+        ColorCorner.CornerRadius = UDim.new(0,2) -- Keep Color Slider radius small
 
         ColorSlider.Name = "ColorSlider"
         ColorSlider.Parent = Color
