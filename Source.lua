@@ -291,15 +291,17 @@ function library:Window(name)
         ToggleDescription.TextWrapped = true
         ToggleDescription.TextXAlignment = Enum.TextXAlignment.Left
         ToggleDescription.ZIndex = 2 + zindex
+        
+        -- Define the custom colors
+        local OFF_COLOR = Color3.fromRGB(30, 34, 40) -- Darker than window background
+        local ON_COLOR = Color3.fromRGB(53, 59, 72)  -- Same as normal buttons, brighter than window background
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
         
-        -- Use a darker color for the OFF state background
-        local ON_COLOR = Color3.fromRGB(47, 54, 64)
-        local OFF_COLOR = Color3.fromRGB(30, 34, 40)
-
-        ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR -- Initial color based on state
+        -- Set initial color based on state
+        ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR 
+        
         ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
         ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
