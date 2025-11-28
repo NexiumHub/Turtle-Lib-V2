@@ -294,7 +294,7 @@ function library:Window(name)
         
         -- Define the custom colors
         local OFF_COLOR = Color3.fromRGB(30, 34, 40) -- Darker than window background
-        local ON_COLOR = Color3.fromRGB(53, 59, 72)  -- Same as normal buttons, brighter than window background
+        local ON_COLOR = Color3.fromRGB(30, 34, 40)  -- Same as normal buttons, brighter than window background
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
