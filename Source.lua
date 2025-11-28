@@ -162,7 +162,7 @@ function library:Window(name)
     Minimise.Size = UDim2.new(0, 18, 0, 18) -- Reduced size for indentation/cleaner look
     Minimise.ZIndex = 7 + zindex
     Minimise.Font = Enum.Font.SourceSans
-    Minimise.Text = "—" -- Minimal text for open state
+    Minimise.Text = "—" -- New minimal text for open state
     Minimise.TextColor3 = Color3.fromRGB(0, 0, 0)
     Minimise.TextSize = 18.000 -- Adjusted text size
     Minimise.MouseButton1Up:connect(function()
@@ -269,36 +269,23 @@ function library:Window(name)
     function functions:Toggle(text, on, callback)
         local callback = callback or function() end
 
+        local OFF_COLOR = Color3.fromRGB(47, 54, 64)
+        local ON_COLOR = Color3.fromRGB(68, 189, 50) -- The color of the filler
+
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
 
         listOffset[winCount] = listOffset[winCount] + 32
 
-        -- START NEW BACKGROUND: Introduce a container frame to hold all elements for the row item
-        local ToggleContainer = Instance.new("Frame")
-        -- ROUND CORNERS ADDED to the background frame
-        local ToggleContainerCorner = Instance.new("UICorner")
-        ToggleContainerCorner.CornerRadius = UDim.new(0, 5)
-        ToggleContainerCorner.Parent = ToggleContainer
-        
-        ToggleContainer.Name = "ToggleContainer"
-        ToggleContainer.Parent = Window
-        ToggleContainer.BackgroundColor3 = Color3.fromRGB(53, 59, 72) -- Button background color
-        ToggleContainer.BorderColor3 = Color3.fromRGB(113, 128, 147)
-        ToggleContainer.Position = UDim2.new(0, 12, 0, listOffset[winCount])
-        ToggleContainer.Size = UDim2.new(0, 182, 0, 26) -- Matches Button size
-        ToggleContainer.ZIndex = 2 + zindex
-        -- END NEW BACKGROUND
-
-        local ToggleDescription = Instance.new("TextLabel") -- Now only for the text
+        local ToggleDescription = Instance.new("TextLabel")
         local ToggleButton = Instance.new("TextButton")
         local ToggleFiller = Instance.new("Frame")
 
         ToggleDescription.Name = "ToggleDescription"
-        ToggleDescription.Parent = ToggleContainer -- Reparented
+        ToggleDescription.Parent = Window
         ToggleDescription.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ToggleDescription.BackgroundTransparency = 1.000
-        ToggleDescription.Position = UDim2.new(0, 10, 0, 0) -- Adjusted position for left padding
+        ToggleDescription.Position = UDim2.new(0, 14, 0, listOffset[winCount])
         ToggleDescription.Size = UDim2.new(0, 131, 0, 26)
         ToggleDescription.Font = Enum.Font.SourceSans
         ToggleDescription.Text = text or "Toggle"
@@ -306,20 +293,20 @@ function library:Window(name)
         ToggleDescription.TextSize = 16.000
         ToggleDescription.TextWrapped = true
         ToggleDescription.TextXAlignment = Enum.TextXAlignment.Left
-        ToggleDescription.ZIndex = 3 + zindex
+        ToggleDescription.ZIndex = 2 + zindex
 
         ToggleButton.Name = "ToggleButton"
-        ToggleButton.Parent = ToggleContainer -- Reparented to the new container
-        ToggleButton.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
+        ToggleButton.Parent = ToggleDescription
+        -- UPDATED: Set initial background color based on 'on' state
+        ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR
         ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
-        -- New Position relative to the 182-width container, Y=2 for vertical centering (26-22)/2
-        ToggleButton.Position = UDim2.new(0, 155, 0, 2)
+        ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
         ToggleButton.Font = Enum.Font.SourceSans
         ToggleButton.Text = ""
         ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleButton.TextSize = 14.000
-        ToggleButton.ZIndex = 3 + zindex
+        ToggleButton.ZIndex = 2 + zindex
         -- ROUND CORNERS ADDED
         local ToggleButtonCorner = Instance.new("UICorner")
         ToggleButtonCorner.CornerRadius = UDim.new(0, 5)
@@ -327,17 +314,25 @@ function library:Window(name)
         -- END ROUND CORNERS
         ToggleButton.MouseButton1Up:Connect(function()
             ToggleFiller.Visible = not ToggleFiller.Visible
+            
+            -- UPDATED: Change ToggleButton background color on click
+            if ToggleFiller.Visible then
+                ToggleButton.BackgroundColor3 = ON_COLOR
+            else
+                ToggleButton.BackgroundColor3 = OFF_COLOR
+            end
+            
             callback(ToggleFiller.Visible)
         end)
 
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
-        ToggleFiller.BackgroundColor3 = Color3.fromRGB(68, 189, 50)
+        ToggleFiller.BackgroundColor3 = ON_COLOR -- Use the green color for the filler too
         ToggleFiller.BorderColor3 = Color3.fromRGB(47, 54, 64)
         ToggleFiller.Position = UDim2.new(0, 5, 0, 5)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller.Visible = on
-        ToggleFiller.ZIndex = 3 + zindex
+        ToggleFiller.ZIndex = 2 + zindex
         -- ROUND CORNERS ADDED
         local ToggleFillerCorner = Instance.new("UICorner")
         ToggleFillerCorner.CornerRadius = UDim.new(0, 3)
@@ -1048,7 +1043,4 @@ function library:Window(name)
 	return colorFuncs
     end
 
-    return functions
-end
-
-return library
+    return library
