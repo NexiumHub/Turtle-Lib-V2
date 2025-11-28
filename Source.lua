@@ -162,7 +162,7 @@ function library:Window(name)
     Minimise.Size = UDim2.new(0, 18, 0, 18) -- Reduced size for indentation/cleaner look
     Minimise.ZIndex = 7 + zindex
     Minimise.Font = Enum.Font.SourceSans
-    Minimise.Text = "—" -- New minimal text for open state
+    Minimise.Text = "—" -- Minimal text for open state
     Minimise.TextColor3 = Color3.fromRGB(0, 0, 0)
     Minimise.TextSize = 18.000 -- Adjusted text size
     Minimise.MouseButton1Up:connect(function()
@@ -274,15 +274,31 @@ function library:Window(name)
 
         listOffset[winCount] = listOffset[winCount] + 32
 
-        local ToggleDescription = Instance.new("TextLabel")
+        -- START NEW BACKGROUND: Introduce a container frame to hold all elements for the row item
+        local ToggleContainer = Instance.new("Frame")
+        -- ROUND CORNERS ADDED to the background frame
+        local ToggleContainerCorner = Instance.new("UICorner")
+        ToggleContainerCorner.CornerRadius = UDim.new(0, 5)
+        ToggleContainerCorner.Parent = ToggleContainer
+        
+        ToggleContainer.Name = "ToggleContainer"
+        ToggleContainer.Parent = Window
+        ToggleContainer.BackgroundColor3 = Color3.fromRGB(53, 59, 72) -- Button background color
+        ToggleContainer.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        ToggleContainer.Position = UDim2.new(0, 12, 0, listOffset[winCount])
+        ToggleContainer.Size = UDim2.new(0, 182, 0, 26) -- Matches Button size
+        ToggleContainer.ZIndex = 2 + zindex
+        -- END NEW BACKGROUND
+
+        local ToggleDescription = Instance.new("TextLabel") -- Now only for the text
         local ToggleButton = Instance.new("TextButton")
         local ToggleFiller = Instance.new("Frame")
 
         ToggleDescription.Name = "ToggleDescription"
-        ToggleDescription.Parent = Window
+        ToggleDescription.Parent = ToggleContainer -- Reparented
         ToggleDescription.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         ToggleDescription.BackgroundTransparency = 1.000
-        ToggleDescription.Position = UDim2.new(0, 14, 0, listOffset[winCount])
+        ToggleDescription.Position = UDim2.new(0, 10, 0, 0) -- Adjusted position for left padding
         ToggleDescription.Size = UDim2.new(0, 131, 0, 26)
         ToggleDescription.Font = Enum.Font.SourceSans
         ToggleDescription.Text = text or "Toggle"
@@ -290,19 +306,20 @@ function library:Window(name)
         ToggleDescription.TextSize = 16.000
         ToggleDescription.TextWrapped = true
         ToggleDescription.TextXAlignment = Enum.TextXAlignment.Left
-        ToggleDescription.ZIndex = 2 + zindex
+        ToggleDescription.ZIndex = 3 + zindex
 
         ToggleButton.Name = "ToggleButton"
-        ToggleButton.Parent = ToggleDescription
+        ToggleButton.Parent = ToggleContainer -- Reparented to the new container
         ToggleButton.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
         ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
-        ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
+        -- New Position relative to the 182-width container, Y=2 for vertical centering (26-22)/2
+        ToggleButton.Position = UDim2.new(0, 155, 0, 2)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
         ToggleButton.Font = Enum.Font.SourceSans
         ToggleButton.Text = ""
         ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
         ToggleButton.TextSize = 14.000
-        ToggleButton.ZIndex = 2 + zindex
+        ToggleButton.ZIndex = 3 + zindex
         -- ROUND CORNERS ADDED
         local ToggleButtonCorner = Instance.new("UICorner")
         ToggleButtonCorner.CornerRadius = UDim.new(0, 5)
@@ -320,7 +337,7 @@ function library:Window(name)
         ToggleFiller.Position = UDim2.new(0, 5, 0, 5)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller.Visible = on
-        ToggleFiller.ZIndex = 2 + zindex
+        ToggleFiller.ZIndex = 3 + zindex
         -- ROUND CORNERS ADDED
         local ToggleFillerCorner = Instance.new("UICorner")
         ToggleFillerCorner.CornerRadius = UDim.new(0, 3)
