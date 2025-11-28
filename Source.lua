@@ -106,7 +106,7 @@ function library:Window(name)
     local winCount = windowCount
     local zindex = winCount * 7
     local UiWindow = Instance.new("Frame")
-    -- ROUND CORNERS ADDED
+    -- ROUND CORNERS ADDED: Main Window Frame
     local WindowCorner = Instance.new("UICorner")
     WindowCorner.CornerRadius = UDim.new(0, 5)
     WindowCorner.Parent = UiWindow
@@ -125,7 +125,7 @@ function library:Window(name)
     xOffset = xOffset + 230
 
     local Header = Instance.new("Frame")
-    -- ROUND CORNERS ADDED
+    -- ROUND CORNERS ADDED: Header
     local HeaderCorner = Instance.new("UICorner")
     HeaderCorner.CornerRadius = UDim.new(0, 5)
     HeaderCorner.Parent = Header
@@ -153,25 +153,44 @@ function library:Window(name)
 
     local Minimise = Instance.new("TextButton")
     local Window = Instance.new("Frame")
+    
+    -- MINIMISE BUTTON REFACTOR START
     Minimise.Name = "Minimise"
     Minimise.Parent = Header
     Minimise.BackgroundColor3 = Color3.fromRGB(0, 168, 255)
     Minimise.BorderColor3 = Color3.fromRGB(0, 168, 255)
-    Minimise.Position = UDim2.new(0, 185, 0, 2)
-    Minimise.Size = UDim2.new(0, 22, 0, 22)
+    Minimise.Position = UDim2.new(1, -22, 0, 0) -- Right-aligned and integrated
+    Minimise.Size = UDim2.new(0, 22, 0, 26) -- Full height of Header
     Minimise.ZIndex = 7 + zindex
     Minimise.Font = Enum.Font.SourceSansLight
-    Minimise.Text = "_"
+    Minimise.Text = "" -- REMOVED TEXT
     Minimise.TextColor3 = Color3.fromRGB(0, 0, 0)
     Minimise.TextSize = 20.000
+    
+    -- ADDED: Corner for the minimize button
+    local MinimiseCorner = Instance.new("UICorner")
+    MinimiseCorner.CornerRadius = UDim.new(0, 5)
+    MinimiseCorner.Parent = Minimise
+    
+    -- ADDED: Non-text visual indicator (a small dot)
+    local MinimiseDot = Instance.new("Frame")
+    MinimiseDot.Name = "MinimiseDot"
+    MinimiseDot.Parent = Minimise
+    MinimiseDot.BackgroundColor3 = Color3.fromRGB(47, 54, 64) -- Dark color for contrast
+    MinimiseDot.Size = UDim2.new(0, 8, 0, 8) -- A small dot
+    MinimiseDot.Position = UDim2.new(0.5, 0, 0.5, 0)
+    MinimiseDot.AnchorPoint = Vector2.new(0.5, 0.5)
+    
+    local MinimiseDotCorner = Instance.new("UICorner")
+    MinimiseDotCorner.CornerRadius = UDim.new(1, 0) -- Makes it a perfect circle
+    MinimiseDotCorner.Parent = MinimiseDot
+    
+    -- Logic updated to only toggle Window visibility and the visual dot's visibility
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
-	if Window.Visible then
-		Minimise.Text = "_"
-	else
-		Minimise.Text = "+"
-	end
+	    MinimiseDot.Visible = Window.Visible -- Hide the dot when content is minimized (Hidden)
     end)
+    -- MINIMISE BUTTON REFACTOR END
 
     Window.Name = "Window"
     Window.Parent = Header
@@ -180,6 +199,12 @@ function library:Window(name)
     Window.Position = UDim2.new(0, 0, 0, 0)
     Window.Size = UDim2.new(0, 207, 0, 33)
     Window.ZIndex = 1 + zindex
+    
+    -- ROUND CORNERS ADDED: Main Content Frame
+    local WindowContentCorner = Instance.new("UICorner")
+    WindowContentCorner.CornerRadius = UDim.new(0, 5)
+    WindowContentCorner.Parent = Window
+    -- END ROUND CORNERS
 
     local functions = {}
     functions.__index = functions
@@ -1007,24 +1032,4 @@ function library:Window(name)
         if type(color) == "userdata" then
             ToggleFiller_2.Visible = false
 	        ColorPicker.BackgroundColor3 = color
-        elseif color and type(color) == "boolean" and not con then
-	        ToggleFiller_2.Visible = true
-                con = stepped:Connect(function()
-                    if ToggleFiller_2.Visible then
-                        local hue2 = tick() % 5 / 5
-                        color3 = Color3.fromHSV(hue2, 1, 1)
-                        callback(color3)
-                        ColorPicker.BackgroundColor3 = color3
-                    else
-                        con:Disconnect()
-                    end
-                end)
-	        end
-	    end
-	return colorFuncs
-    end
-
-    return functions
-end
-
-return library
+        elseif color and type(
