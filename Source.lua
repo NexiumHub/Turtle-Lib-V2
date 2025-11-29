@@ -1,4 +1,4 @@
---0.1
+--
 local library = {}
 local windowCount = 0
 local sizes = {}
@@ -296,6 +296,8 @@ function library:Window(name)
         -- USE THEME COLOR
         Button.BackgroundColor3 = CURRENT_THEME.Button
         Button.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- FIX: Ensure button has a solid background
+        Button.BackgroundTransparency = 0 
         -- END USE THEME COLOR
         Button.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Button.Size = UDim2.new(0, 182, 0, 26)
@@ -324,8 +326,9 @@ function library:Window(name)
         local Label = Instance.new("TextLabel")
         Label.Name = "Label"
         Label.Parent = Window
-        Label.BackgroundColor3 = Color3.fromRGB(220, 221, 225)
-        Label.BackgroundTransparency = 1.000
+        -- FIX: Use a solid background color from the theme (like Button background)
+        Label.BackgroundColor3 = CURRENT_THEME.Button
+        Label.BackgroundTransparency = 0.000 -- Was 1.000
         Label.BorderColor3 = Color3.fromRGB(27, 42, 53)
         Label.Position = UDim2.new(0, 0, 0, listOffset[winCount])
         Label.Size = UDim2.new(0, 206, 0, 29)
@@ -551,7 +554,7 @@ function library:Window(name)
             local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
             callback(math.round(value))
             end
-        end
+        end)
 
         Slider.Name = "Slider"
         Slider.Parent = Window
