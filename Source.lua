@@ -17,7 +17,7 @@ end
 
 function Lerp(a, b, c)
     return a + ((b - a) * c)
-end
+}
 
 local players = game:service('Players');
 local player = players.LocalPlayer;
@@ -176,6 +176,7 @@ function library:Window(name)
     -- USE THEME COLOR
     UiWindow.BackgroundColor3 = CURRENT_THEME.Window
     UiWindow.BorderColor3 = CURRENT_THEME.WindowBorder
+    UiWindow.BackgroundTransparency = 0.000 -- Explicitly set transparency to 0 for the open state
     -- END USE THEME COLOR
     UiWindow.Position = UDim2.new(0, xOffset, 0, 20)
     UiWindow.Size = UDim2.new(0, 207, 0, 33)
@@ -234,11 +235,15 @@ function library:Window(name)
     Minimise.TextSize = 18.000 -- Adjusted text size
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
-	if Window.Visible then
-		Minimise.Text = "—" -- Use dash for open/visible state
-	else
-		Minimise.Text = "■" -- Use small block for closed/minimized state
-	end
+	    if Window.Visible then
+            -- Open State: Content visible, container background visible
+            Minimise.Text = "—" 
+            UiWindow.BackgroundTransparency = 0.000 -- MAKE VISIBLE
+	    else
+            -- Minimized State: Content invisible, container background invisible
+            Minimise.Text = "■" 
+            UiWindow.BackgroundTransparency = 1.000 -- MAKE INVISIBLE (Hides the 'black' part)
+	    end
     end)
     -- END MINIMISE BUTTON ADJUSTMENTS
 
