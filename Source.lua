@@ -1,3 +1,4 @@
+--
 local library = {}
 local windowCount = 0
 local sizes = {}
@@ -17,7 +18,7 @@ end
 
 function Lerp(a, b, c)
     return a + ((b - a) * c)
-}
+end
 
 local players = game:service('Players');
 local player = players.LocalPlayer;
@@ -176,7 +177,6 @@ function library:Window(name)
     -- USE THEME COLOR
     UiWindow.BackgroundColor3 = CURRENT_THEME.Window
     UiWindow.BorderColor3 = CURRENT_THEME.WindowBorder
-    UiWindow.BackgroundTransparency = 0.000 -- Explicitly set transparency to 0 for the open state
     -- END USE THEME COLOR
     UiWindow.Position = UDim2.new(0, xOffset, 0, 20)
     UiWindow.Size = UDim2.new(0, 207, 0, 33)
@@ -233,19 +233,23 @@ function library:Window(name)
     Minimise.Text = "—" -- New minimal text for open state
     Minimise.TextColor3 = Color3.fromRGB(0, 0, 0) -- Stays black for contrast
     Minimise.TextSize = 18.000 -- Adjusted text size
+
+    -- ***************************************************************
+    -- REVISED MINIMISE LOGIC: TOGGLES Window.Visible AND UiWindow.BackgroundTransparency
+    -- ***************************************************************
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
-	    if Window.Visible then
-            -- Open State: Content visible, container background visible
-            Minimise.Text = "—" 
-            UiWindow.BackgroundTransparency = 0.000 -- MAKE VISIBLE
-	    else
-            -- Minimized State: Content invisible, container background invisible
-            Minimise.Text = "■" 
-            UiWindow.BackgroundTransparency = 1.000 -- MAKE INVISIBLE (Hides the 'black' part)
-	    end
+	if Window.Visible then
+		Minimise.Text = "—" -- Use dash for open/visible state
+        UiWindow.BackgroundTransparency = 0 -- Make the UiWindow background visible (full size)
+	else
+		Minimise.Text = "■" -- Use small block for closed/minimized state
+        UiWindow.BackgroundTransparency = 1 -- Make the UiWindow background invisible (hides the 'black bar')
+	end
     end)
-    -- END MINIMISE BUTTON ADJUSTMENTS
+    -- ***************************************************************
+    -- END REVISED MINIMISE LOGIC
+    -- ***************************************************************
 
     -- ROUND CORNERS ADDED (Window/Content Frame - Fix for Request 1)
     local WindowContentCorner = Instance.new("UICorner")
@@ -374,11 +378,9 @@ function library:Window(name)
         
         -- Define the custom colors using the theme
         local OFF_COLOR = CURRENT_THEME.Button 
-        -- *******************************************************************
         -- CHANGE REQUESTED: Toggle ON background color must be the same as OFF
         local ON_COLOR = CURRENT_THEME.Button 
-        -- *******************************************************************
-
+        
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
         
