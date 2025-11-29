@@ -369,7 +369,10 @@ function library:Window(name)
         
         -- Define the custom colors using the theme
         local OFF_COLOR = CURRENT_THEME.Button 
-        local ON_COLOR = CURRENT_THEME.Accent -- Using Accent for better visual distinction
+        -- *******************************************************************
+        -- CHANGE REQUESTED: Toggle ON background color must be the same as OFF
+        local ON_COLOR = CURRENT_THEME.Button 
+        -- *******************************************************************
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
@@ -397,9 +400,9 @@ function library:Window(name)
             
             -- Change the button's background color when visibility changes
             if ToggleFiller.Visible then
-                ToggleButton.BackgroundColor3 = ON_COLOR
+                ToggleButton.BackgroundColor3 = ON_COLOR -- This is now CURRENT_THEME.Button
             else
-                ToggleButton.BackgroundColor3 = OFF_COLOR
+                ToggleButton.BackgroundColor3 = OFF_COLOR -- This is also CURRENT_THEME.Button
             end
             
             callback(ToggleFiller.Visible)
@@ -407,7 +410,7 @@ function library:Window(name)
 
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
-        -- USE THEME COLOR (Actual toggle indicator color)
+        -- USE THEME COLOR (Actual toggle indicator color - remains CURRENT_THEME.ToggleOn)
         ToggleFiller.BackgroundColor3 = CURRENT_THEME.ToggleOn
         ToggleFiller.BorderColor3 = CURRENT_THEME.Background
         -- END USE THEME COLOR
