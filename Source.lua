@@ -1,4 +1,3 @@
---
 local library = {}
 local windowCount = 0
 local sizes = {}
@@ -233,23 +232,15 @@ function library:Window(name)
     Minimise.Text = "—" -- New minimal text for open state
     Minimise.TextColor3 = Color3.fromRGB(0, 0, 0) -- Stays black for contrast
     Minimise.TextSize = 18.000 -- Adjusted text size
-
-    -- ***************************************************************
-    -- REVISED MINIMISE LOGIC: TOGGLES Window.Visible AND UiWindow.BackgroundTransparency
-    -- ***************************************************************
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
 	if Window.Visible then
 		Minimise.Text = "—" -- Use dash for open/visible state
-        UiWindow.BackgroundTransparency = 0 -- Make the UiWindow background visible (full size)
 	else
 		Minimise.Text = "■" -- Use small block for closed/minimized state
-        UiWindow.BackgroundTransparency = 1 -- Make the UiWindow background invisible (hides the 'black bar')
 	end
     end)
-    -- ***************************************************************
-    -- END REVISED MINIMISE LOGIC
-    -- ***************************************************************
+    -- END MINIMISE BUTTON ADJUSTMENTS
 
     -- ROUND CORNERS ADDED (Window/Content Frame - Fix for Request 1)
     local WindowContentCorner = Instance.new("UICorner")
@@ -296,8 +287,6 @@ function library:Window(name)
         -- USE THEME COLOR
         Button.BackgroundColor3 = CURRENT_THEME.Button
         Button.BorderColor3 = CURRENT_THEME.ButtonBorder
-        -- FIX: Ensure button has a solid background
-        Button.BackgroundTransparency = 0 
         -- END USE THEME COLOR
         Button.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Button.Size = UDim2.new(0, 182, 0, 26)
@@ -326,9 +315,8 @@ function library:Window(name)
         local Label = Instance.new("TextLabel")
         Label.Name = "Label"
         Label.Parent = Window
-        -- FIX: Use a solid background color from the theme (like Button background)
-        Label.BackgroundColor3 = CURRENT_THEME.Button
-        Label.BackgroundTransparency = 0.000 -- Was 1.000
+        Label.BackgroundColor3 = Color3.fromRGB(220, 221, 225)
+        Label.BackgroundTransparency = 1.000
         Label.BorderColor3 = Color3.fromRGB(27, 42, 53)
         Label.Position = UDim2.new(0, 0, 0, listOffset[winCount])
         Label.Size = UDim2.new(0, 206, 0, 29)
@@ -381,9 +369,11 @@ function library:Window(name)
         
         -- Define the custom colors using the theme
         local OFF_COLOR = CURRENT_THEME.Button 
+        -- *******************************************************************
         -- CHANGE REQUESTED: Toggle ON background color must be the same as OFF
         local ON_COLOR = CURRENT_THEME.Button 
-        
+        -- *******************************************************************
+
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
         
@@ -554,7 +544,7 @@ function library:Window(name)
             local value = Lerp(min, max, SliderButton.Position.X.Offset/(Slider.Size.X.Offset-5))
             callback(math.round(value))
             end
-        end)
+        end
 
         Slider.Name = "Slider"
         Slider.Parent = Window
