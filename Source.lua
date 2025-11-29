@@ -173,9 +173,9 @@ function library:Window(name)
 
     UiWindow.Name = "UiWindow"
     UiWindow.Parent = TurtleUiLib
-    -- USE THEME COLOR
-    UiWindow.BackgroundColor3 = CURRENT_THEME.Window
-    UiWindow.BorderColor3 = CURRENT_THEME.WindowBorder
+    -- USE THEME COLOR - MODIFIED to use CURRENT_THEME.Header
+    UiWindow.BackgroundColor3 = CURRENT_THEME.Header
+    UiWindow.BorderColor3 = CURRENT_THEME.Header
     -- END USE THEME COLOR
     UiWindow.Position = UDim2.new(0, xOffset, 0, 20)
     UiWindow.Size = UDim2.new(0, 207, 0, 33)
