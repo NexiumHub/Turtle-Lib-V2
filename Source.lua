@@ -216,14 +216,6 @@ function library:Window(name)
     HeaderText.TextColor3 = CURRENT_THEME.HeaderText
     -- END USE THEME COLOR
     HeaderText.TextSize = 17.000
-    
-    -- ***************************************************************
-    -- REVISED LOGIC: CENTER ALIGNMENT FOR HEADER TEXT
-    -- ***************************************************************
-    HeaderText.TextXAlignment = Enum.TextXAlignment.Center 
-    -- ***************************************************************
-    -- END REVISED LOGIC
-    -- ***************************************************************
 
     local Minimise = Instance.new("TextButton")
     local Window = Instance.new("Frame")
@@ -292,7 +284,6 @@ function library:Window(name)
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
 
-        listOffset[winCount] = listOffset[winCount] + 32
         local Button = Instance.new("TextButton")
         -- ROUND CORNERS ADDED
         local ButtonCorner = Instance.new("UICorner")
