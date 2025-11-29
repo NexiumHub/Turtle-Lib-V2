@@ -90,6 +90,8 @@ Add buttons to the dropdown after the fact:
 ```lua
 -- Name
 
+
+
 dropdown:Button("New button")
 ```
 
@@ -110,4 +112,8 @@ library:Keybind("P")
 Destroy the UI:
 ```lua
 library:Destroy()
+```
+Set Theme
+```lua
+library:SetTheme("ThemeName")
 ```
