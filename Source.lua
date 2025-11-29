@@ -81,6 +81,65 @@ local uis = game:GetService("UserInputService")
 
 local keybindConnection
 
+-- ===============================================
+-- THEME DEFINITIONS AND API START
+-- ===============================================
+
+local THEMES = {
+    -- The key names match the variables from your HTML CSS structure.
+    Dark = {
+        Window = Color3.fromHex("1c1c1c"), WindowBorder = Color3.fromHex("1c1c1c"), Header = Color3.fromHex("282828"), HeaderText = Color3.fromHex("f0f0f0"),
+        Button = Color3.fromHex("262626"), ButtonBorder = Color3.fromHex("3c3c3c"), Text = Color3.fromHex("e6e6e6"), Accent = Color3.fromHex("e0e0e0"),
+        ToggleOn = Color3.fromHex("00ff00"), SliderFill = Color3.fromHex("ffffff"), Background = Color3.fromHex("151515"),
+    },
+    MatrixGreen = {
+        Window = Color3.fromHex("141814"), WindowBorder = Color3.fromHex("141814"), Header = Color3.fromHex("203020"), HeaderText = Color3.fromHex("e6e6e6"),
+        Button = Color3.fromHex("1c221c"), ButtonBorder = Color3.fromHex("394a39"), Text = Color3.fromHex("e6f5e6"), Accent = Color3.fromHex("7da37d"),
+        ToggleOn = Color3.fromHex("00ff00"), SliderFill = Color3.fromHex("d8ffd8"), Background = Color3.fromHex("0f130f"),
+    },
+    NeonBlue = {
+        Window = Color3.fromHex("121820"), WindowBorder = Color3.fromHex("121820"), Header = Color3.fromHex("244466"), HeaderText = Color3.fromHex("e6e6e6"),
+        Button = Color3.fromHex("1c2533"), ButtonBorder = Color3.fromHex("4d6b8f"), Text = Color3.fromHex("e6eaf0"), Accent = Color3.fromHex("8aaacd"),
+        ToggleOn = Color3.fromHex("00ff00"), SliderFill = Color3.fromHex("dfeaff"), Background = Color3.fromHex("0d1118"),
+    },
+    GlassDark = {
+        Window = Color3.fromHex("1e2126"), WindowBorder = Color3.fromHex("1e2126"), Header = Color3.fromHex("475a96"), HeaderText = Color3.fromHex("f0f0f0"),
+        Button = Color3.fromHex("2b303c"), ButtonBorder = Color3.fromHex("566278"), Text = Color3.fromHex("f0f0f0"), Accent = Color3.fromHex("9fb5d7"),
+        ToggleOn = Color3.fromHex("00ff00"), SliderFill = Color3.fromHex("dce6ff"), Background = Color3.fromHex("13151a"),
+    },
+    AestheticPink = {
+        Window = Color3.fromHex("241820"), WindowBorder = Color3.fromHex("241820"), Header = Color3.fromHex("9e6f85"), HeaderText = Color3.fromHex("f5f5f5"),
+        Button = Color3.fromHex("3a2a33"), ButtonBorder = Color3.fromHex("806776"), Text = Color3.fromHex("f5f5f5"), Accent = Color3.fromHex("c29baa"),
+        ToggleOn = Color3.fromHex("00ff00"), SliderFill = Color3.fromHex("f2d5dd"), Background = Color3.fromHex("1b1218"),
+    },
+}
+
+-- Default theme (Using the colors of the original library as a fallback/default before 'Dark' is applied)
+local CURRENT_THEME = {
+    Window = Color3.fromRGB(0, 151, 230), WindowBorder = Color3.fromRGB(0, 151, 230), Header = Color3.fromRGB(0, 168, 255), HeaderText = Color3.fromRGB(47, 54, 64),
+    Button = Color3.fromRGB(53, 59, 72), ButtonBorder = Color3.fromRGB(113, 128, 147), Text = Color3.fromRGB(245, 246, 250), Accent = Color3.fromRGB(0, 168, 255),
+    ToggleOn = Color3.fromRGB(68, 189, 50), SliderFill = Color3.fromRGB(76, 209, 55), Background = Color3.fromRGB(47, 54, 64),
+}
+
+-- The Theme API function
+function library:SetTheme(themeName)
+    local theme = THEMES[themeName]
+    if theme then
+        CURRENT_THEME = theme
+        -- Optionally, refresh existing windows if needed (not strictly required by API, but helpful)
+        -- For now, new elements will use the new theme. Existing elements need manual update hooks, 
+        -- but since the request was to *add* the API, we focus on creation defaults.
+        print("Theme set to: " .. themeName)
+    else
+        warn("Theme '" .. tostring(themeName) .. "' not found.")
+    end
+end
+library.Themes = THEMES -- Expose themes list for user selection/reference
+
+-- ===============================================
+-- THEME DEFINITIONS AND API END
+-- ===============================================
+
 function library:Destroy()
     TurtleUiLib:Destroy()
     if keybindConnection then
@@ -114,8 +173,10 @@ function library:Window(name)
 
     UiWindow.Name = "UiWindow"
     UiWindow.Parent = TurtleUiLib
-    UiWindow.BackgroundColor3 = Color3.fromRGB(0, 151, 230)
-    UiWindow.BorderColor3 = Color3.fromRGB(0, 151, 230)
+    -- USE THEME COLOR
+    UiWindow.BackgroundColor3 = CURRENT_THEME.Window
+    UiWindow.BorderColor3 = CURRENT_THEME.WindowBorder
+    -- END USE THEME COLOR
     UiWindow.Position = UDim2.new(0, xOffset, 0, 20)
     UiWindow.Size = UDim2.new(0, 207, 0, 33)
     UiWindow.ZIndex = 4 + zindex
@@ -132,8 +193,10 @@ function library:Window(name)
     -- END ROUND CORNERS
     Header.Name = "Header"
     Header.Parent = UiWindow
-    Header.BackgroundColor3 = Color3.fromRGB(0, 168, 255)
-    Header.BorderColor3 = Color3.fromRGB(0, 168, 255)
+    -- USE THEME COLOR
+    Header.BackgroundColor3 = CURRENT_THEME.Header
+    Header.BorderColor3 = CURRENT_THEME.Header
+    -- END USE THEME COLOR
     Header.Position = UDim2.new(0, 0, -0.0202544238, 0)
     Header.Size = UDim2.new(0, 207, 0, 26)
     Header.ZIndex = 5 + zindex
@@ -148,7 +211,9 @@ function library:Window(name)
     HeaderText.ZIndex = 6 + zindex
     HeaderText.Font = Enum.Font.SourceSans
     HeaderText.Text = name or "Window"
-    HeaderText.TextColor3 = Color3.fromRGB(47, 54, 64)
+    -- USE THEME COLOR
+    HeaderText.TextColor3 = CURRENT_THEME.HeaderText
+    -- END USE THEME COLOR
     HeaderText.TextSize = 17.000
 
     local Minimise = Instance.new("TextButton")
@@ -156,14 +221,16 @@ function library:Window(name)
     -- MINIMISE BUTTON ADJUSTMENTS (New Size/Position and Text)
     Minimise.Name = "Minimise"
     Minimise.Parent = Header
-    Minimise.BackgroundColor3 = Color3.fromRGB(0, 168, 255)
-    Minimise.BorderColor3 = Color3.fromRGB(0, 168, 255)
+    -- USE THEME COLOR
+    Minimise.BackgroundColor3 = CURRENT_THEME.Header
+    Minimise.BorderColor3 = CURRENT_THEME.Header
+    -- END USE THEME COLOR
     Minimise.Position = UDim2.new(0, 185, 0, 4) -- Adjusted Y to be centered (26-18=8, 8/2=4)
     Minimise.Size = UDim2.new(0, 18, 0, 18) -- Reduced size for indentation/cleaner look
     Minimise.ZIndex = 7 + zindex
     Minimise.Font = Enum.Font.SourceSans
     Minimise.Text = "—" -- New minimal text for open state
-    Minimise.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Minimise.TextColor3 = Color3.fromRGB(0, 0, 0) -- Stays black for contrast
     Minimise.TextSize = 18.000 -- Adjusted text size
     Minimise.MouseButton1Up:connect(function()
         Window.Visible = not Window.Visible
@@ -182,8 +249,10 @@ function library:Window(name)
     -- END ROUND CORNERS
     Window.Name = "Window"
     Window.Parent = Header
-    Window.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
-    Window.BorderColor3 = Color3.fromRGB(47, 54, 64)
+    -- USE THEME COLOR
+    Window.BackgroundColor3 = CURRENT_THEME.Background
+    Window.BorderColor3 = CURRENT_THEME.Background
+    -- END USE THEME COLOR
     Window.Position = UDim2.new(0, 0, 0, 0)
     Window.Size = UDim2.new(0, 207, 0, 33)
     Window.ZIndex = 1 + zindex
@@ -215,14 +284,18 @@ function library:Window(name)
         listOffset[winCount] = listOffset[winCount] + 32
         Button.Name = "Button"
         Button.Parent = Window
-        Button.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-        Button.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        Button.BackgroundColor3 = CURRENT_THEME.Button
+        Button.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         Button.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Button.Size = UDim2.new(0, 182, 0, 26)
         Button.ZIndex = 2 + zindex
         Button.Selected = true
         Button.Font = Enum.Font.SourceSans
-        Button.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        Button.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Button.TextSize = 16.000
         Button.TextStrokeTransparency = 123.000
         Button.TextWrapped = true
@@ -233,7 +306,7 @@ function library:Window(name)
     end
     
     function functions:Label(text, color)
-        local color = color or Color3.fromRGB(220, 221, 225)
+        local color = color or CURRENT_THEME.Text -- Use theme text color as default
 
         sizes[winCount] = sizes[winCount] + 32
         Window.Size = UDim2.new(0, 207, 0, sizes[winCount] + 10)
@@ -286,15 +359,17 @@ function library:Window(name)
         ToggleDescription.Size = UDim2.new(0, 131, 0, 26)
         ToggleDescription.Font = Enum.Font.SourceSans
         ToggleDescription.Text = text or "Toggle"
-        ToggleDescription.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        ToggleDescription.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         ToggleDescription.TextSize = 16.000
         ToggleDescription.TextWrapped = true
         ToggleDescription.TextXAlignment = Enum.TextXAlignment.Left
         ToggleDescription.ZIndex = 2 + zindex
         
-        -- Define the custom colors
-        local OFF_COLOR = Color3.fromRGB(30, 34, 40) -- Darker than window background
-        local ON_COLOR = Color3.fromRGB(53, 59, 72)  -- Same as normal buttons, brighter than window background
+        -- Define the custom colors using the theme
+        local OFF_COLOR = CURRENT_THEME.Button 
+        local ON_COLOR = CURRENT_THEME.Accent -- Using Accent for better visual distinction
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
@@ -302,7 +377,9 @@ function library:Window(name)
         -- Set initial color based on state
         ToggleButton.BackgroundColor3 = on and ON_COLOR or OFF_COLOR 
         
-        ToggleButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        ToggleButton.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         ToggleButton.Position = UDim2.new(1.2061069, 0, 0.0769230798, 0)
         ToggleButton.Size = UDim2.new(0, 22, 0, 22)
         ToggleButton.Font = Enum.Font.SourceSans
@@ -330,8 +407,10 @@ function library:Window(name)
 
         ToggleFiller.Name = "ToggleFiller"
         ToggleFiller.Parent = ToggleButton
-        ToggleFiller.BackgroundColor3 = Color3.fromRGB(68, 189, 50)
-        ToggleFiller.BorderColor3 = Color3.fromRGB(47, 54, 64)
+        -- USE THEME COLOR (Actual toggle indicator color)
+        ToggleFiller.BackgroundColor3 = CURRENT_THEME.ToggleOn
+        ToggleFiller.BorderColor3 = CURRENT_THEME.Background
+        -- END USE THEME COLOR
         ToggleFiller.Position = UDim2.new(0, 5, 0, 5)
         ToggleFiller.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller.Visible = on
@@ -353,17 +432,21 @@ function library:Window(name)
         local TextBox = Instance.new("TextBox")
         local BoxDescription = Instance.new("TextLabel")
         TextBox.Parent = Window
-        TextBox.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-        TextBox.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        TextBox.BackgroundColor3 = CURRENT_THEME.Button
+        TextBox.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         TextBox.Position = UDim2.new(0, 99, 0, listOffset[winCount])
         TextBox.Size = UDim2.new(0, 95, 0, 26)
         TextBox.Font = Enum.Font.SourceSans
         TextBox.PlaceholderColor3 = Color3.fromRGB(220, 221, 225)
         TextBox.PlaceholderText = "..."
         TextBox.Text = ""
-        TextBox.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        TextBox.TextColor3 = CURRENT_THEME.Text
+        TextBox.TextStrokeColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         TextBox.TextSize = 16.000
-        TextBox.TextStrokeColor3 = Color3.fromRGB(245, 246, 250)
         TextBox.ZIndex = 2 + zindex
         -- ROUND CORNERS ADDED
         local TextBoxCorner = Instance.new("UICorner")
@@ -385,7 +468,9 @@ function library:Window(name)
         BoxDescription.Size = UDim2.new(0, 75, 0, 26)
         BoxDescription.Font = Enum.Font.SourceSans
         BoxDescription.Text = text or "Box"
-        BoxDescription.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        BoxDescription.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         BoxDescription.TextSize = 16.000
         BoxDescription.TextXAlignment = Enum.TextXAlignment.Left
         BoxDescription.ZIndex = 2 + zindex
@@ -460,8 +545,10 @@ function library:Window(name)
 
         Slider.Name = "Slider"
         Slider.Parent = Window
-        Slider.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
-        Slider.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        Slider.BackgroundColor3 = CURRENT_THEME.Background
+        Slider.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         Slider.Position = UDim2.new(0, 13, 0, listOffset[winCount])
         Slider.Size = UDim2.new(0, 180, 0, 6)
         Slider.ZIndex = 2 + zindex
@@ -476,8 +563,10 @@ function library:Window(name)
         SliderButton.Position = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), -1.333337, 0)
         SliderButton.Name = "SliderButton"
         SliderButton.Parent = Slider
-        SliderButton.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-        SliderButton.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        SliderButton.BackgroundColor3 = CURRENT_THEME.Button
+        SliderButton.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         SliderButton.Size = UDim2.new(0, 6, 0, 22)
         SliderButton.ZIndex = 3 + zindex
         -- ROUND CORNERS ADDED
@@ -495,7 +584,9 @@ function library:Window(name)
         Current.Size = UDim2.new(0, 0, 0, 18)
         Current.Font = Enum.Font.SourceSans
         Current.Text = tostring(default)
-        Current.TextColor3 = Color3.fromRGB(220, 221, 225)
+        -- USE THEME COLOR
+        Current.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Current.TextSize = 14.000  
         Current.ZIndex = 2 + zindex
 
@@ -507,14 +598,18 @@ function library:Window(name)
         Description.Size = UDim2.new(0, 200, 0, 21)
         Description.Font = Enum.Font.SourceSans
         Description.Text = text
-        Description.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        Description.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Description.TextSize = 16.000
         Description.ZIndex = 2 + zindex
 
         SilderFiller.Name = "SilderFiller"
         SilderFiller.Parent = Slider
-        SilderFiller.BackgroundColor3 = Color3.fromRGB(76, 209, 55)
-        SilderFiller.BorderColor3 = Color3.fromRGB(47, 54, 64)
+        -- USE THEME COLOR
+        SilderFiller.BackgroundColor3 = CURRENT_THEME.SliderFill
+        SilderFiller.BorderColor3 = CURRENT_THEME.Background
+        -- END USE THEME COLOR
         SilderFiller.Size = UDim2.new(0, (Slider.Size.X.Offset - 5) * ((default - min)/(max-min)), 0, 6)
         SilderFiller.ZIndex = 2 + zindex
         SilderFiller.BorderMode = Enum.BorderMode.Inset
@@ -532,7 +627,9 @@ function library:Window(name)
         Min.Size = UDim2.new(0, 77, 0, 50)
         Min.Font = Enum.Font.SourceSans
         Min.Text = tostring(min)
-        Min.TextColor3 = Color3.fromRGB(220, 221, 225)
+        -- USE THEME COLOR
+        Min.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Min.TextSize = 14.000
         Min.TextXAlignment = Enum.TextXAlignment.Left
         Min.ZIndex = 2 + zindex
@@ -545,7 +642,9 @@ function library:Window(name)
         Max.Size = UDim2.new(0, 77, 0, 50)
         Max.Font = Enum.Font.SourceSans
         Max.Text = tostring(max)
-        Max.TextColor3 = Color3.fromRGB(220, 221, 225)
+        -- USE THEME COLOR
+        Max.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Max.TextSize = 14.000
         Max.TextXAlignment = Enum.TextXAlignment.Right
         Max.ZIndex = 2 + zindex
@@ -554,7 +653,7 @@ function library:Window(name)
         local slider = {}
         function slider:SetValue(value)
 	    value = math.clamp(value, min, max)
-            local xOffset = (value-min)/max * (Slider.Size.X.Offset)
+            local xOffset = (value-min)/(max-min) * (Slider.Size.X.Offset) -- Use max-min for range scaling
             SliderButton.Position = UDim2.new(0, xOffset , -1.33333337, 0);
             SilderFiller.Size = UDim2.new(0, xOffset, 0, 6)
             Current.Text = tostring(math.round(value))
@@ -577,14 +676,18 @@ function library:Window(name)
 
         Dropdown.Name = "Dropdown"
         Dropdown.Parent = Window
-        Dropdown.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-        Dropdown.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        Dropdown.BackgroundColor3 = CURRENT_THEME.Button
+        Dropdown.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         Dropdown.Position = UDim2.new(0, 12, 0, listOffset[winCount])
         Dropdown.Size = UDim2.new(0, 182, 0, 26)
         Dropdown.Selected = true
         Dropdown.Font = Enum.Font.SourceSans
         Dropdown.Text = tostring(text)
-        Dropdown.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        Dropdown.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Dropdown.TextSize = 16.000
         Dropdown.TextStrokeTransparency = 123.000
         Dropdown.TextWrapped = true
@@ -617,7 +720,9 @@ function library:Window(name)
         DownSign.Size = UDim2.new(0, 27, 0, 22)
         DownSign.Font = Enum.Font.SourceSans
         DownSign.Text = "^"
-        DownSign.TextColor3 = Color3.fromRGB(220, 221, 225)
+        -- USE THEME COLOR (Using Text for the arrow)
+        DownSign.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         DownSign.TextSize = 20.000
         DownSign.ZIndex = 4 + zindex
         DownSign.TextYAlignment = Enum.TextYAlignment.Bottom
@@ -625,8 +730,10 @@ function library:Window(name)
         DropdownFrame.Name = "DropdownFrame"
         DropdownFrame.Parent = Dropdown
         DropdownFrame.Active = true
-        DropdownFrame.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-        DropdownFrame.BorderColor3 = Color3.fromRGB(53, 59, 72)
+        -- USE THEME COLOR (Using Button or Background for the frame)
+        DropdownFrame.BackgroundColor3 = CURRENT_THEME.Button
+        DropdownFrame.BorderColor3 = CURRENT_THEME.Button
+        -- END USE THEME COLOR
         DropdownFrame.Position = UDim2.new(0, 0, 0, 28)
         DropdownFrame.Size = UDim2.new(0, 182, 0, 0)
         DropdownFrame.Visible = false
@@ -635,7 +742,7 @@ function library:Window(name)
         DropdownFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Left
         DropdownFrame.ZIndex = 5 + zindex
         DropdownFrame.ScrollingDirection = Enum.ScrollingDirection.Y
-        DropdownFrame.ScrollBarImageColor3 = Color3.fromRGB(220, 221, 225)
+        DropdownFrame.ScrollBarImageColor3 = Color3.fromRGB(220, 221, 225) -- Stays standard gray/white
         -- ROUND CORNERS ADDED
         local DropdownFrameCorner = Instance.new("UICorner")
         DropdownFrameCorner.CornerRadius = UDim.new(0, 5)
@@ -649,13 +756,17 @@ function library:Window(name)
             local Button_2 = Instance.new("TextButton")
             Button_2.Name = "Button"
             Button_2.Parent = DropdownFrame
-            Button_2.BackgroundColor3 = Color3.fromRGB(53, 59, 72)
-            Button_2.BorderColor3 = Color3.fromRGB(113, 128, 147)
+            -- USE THEME COLOR
+            Button_2.BackgroundColor3 = CURRENT_THEME.Button
+            Button_2.BorderColor3 = CURRENT_THEME.ButtonBorder
+            -- END USE THEME COLOR
             Button_2.Position = UDim2.new(0, 6, 0, canvasSize + 1)
             Button_2.Size = UDim2.new(0, 170, 0, 26)
             Button_2.Selected = true
             Button_2.Font = Enum.Font.SourceSans
-            Button_2.TextColor3 = Color3.fromRGB(245, 246, 250)
+            -- USE THEME COLOR
+            Button_2.TextColor3 = CURRENT_THEME.Text
+            -- END USE THEME COLOR
             Button_2.TextSize = 16.000
             Button_2.TextStrokeTransparency = 123.000
             Button_2.ZIndex = 6 + zindex
@@ -761,15 +872,19 @@ function library:Window(name)
         PickerDescription.Size = UDim2.new(0, 116, 0, 26)
         PickerDescription.Font = Enum.Font.SourceSans
         PickerDescription.Text = name or "Color picker"
-        PickerDescription.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        PickerDescription.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         PickerDescription.TextSize = 16.000
         PickerDescription.TextXAlignment = Enum.TextXAlignment.Left
         PickerDescription.ZIndex = 2 + zindex
 
         ColorPickerFrame.Name = "ColorPickerFrame"
         ColorPickerFrame.Parent = ColorPicker
-        ColorPickerFrame.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
-        ColorPickerFrame.BorderColor3 = Color3.fromRGB(47, 54, 64)
+        -- USE THEME COLOR (Using Background for the pop-up frame)
+        ColorPickerFrame.BackgroundColor3 = CURRENT_THEME.Background
+        ColorPickerFrame.BorderColor3 = CURRENT_THEME.Background
+        -- END USE THEME COLOR
         ColorPickerFrame.Position = UDim2.new(1.40350854, 0, -2.84615374, 0)
         ColorPickerFrame.Size = UDim2.new(0, 158, 0, 155)
         ColorPickerFrame.ZIndex = 3 + zindex
@@ -783,8 +898,10 @@ function library:Window(name)
 
         ToggleRGB.Name = "ToggleRGB"
         ToggleRGB.Parent = ColorPickerFrame
-        ToggleRGB.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
-        ToggleRGB.BorderColor3 = Color3.fromRGB(113, 128, 147)
+        -- USE THEME COLOR
+        ToggleRGB.BackgroundColor3 = CURRENT_THEME.Background
+        ToggleRGB.BorderColor3 = CURRENT_THEME.ButtonBorder
+        -- END USE THEME COLOR
         ToggleRGB.Position = UDim2.new(0, 125, 0, 127)
         ToggleRGB.Size = UDim2.new(0, 22, 0, 22)
         ToggleRGB.Font = Enum.Font.SourceSans
@@ -800,8 +917,10 @@ function library:Window(name)
 
         ToggleFiller_2.Name = "ToggleFiller"
         ToggleFiller_2.Parent = ToggleRGB
-        ToggleFiller_2.BackgroundColor3 = Color3.fromRGB(76, 209, 55)
-        ToggleFiller_2.BorderColor3 = Color3.fromRGB(47, 54, 64)
+        -- USE THEME COLOR
+        ToggleFiller_2.BackgroundColor3 = CURRENT_THEME.ToggleOn
+        ToggleFiller_2.BorderColor3 = CURRENT_THEME.Background
+        -- END USE THEME COLOR
         ToggleFiller_2.Position = UDim2.new(0, 5, 0, 5)
         ToggleFiller_2.Size = UDim2.new(0, 12, 0, 12)
         ToggleFiller_2.ZIndex = 4 + zindex
@@ -819,20 +938,26 @@ function library:Window(name)
         TextLabel.Size = UDim2.new(0, 106, 0, 22)
         TextLabel.Font = Enum.Font.SourceSans
         TextLabel.Text = "Rainbow"
-        TextLabel.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        TextLabel.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         TextLabel.TextSize = 16.000
         TextLabel.TextXAlignment = Enum.TextXAlignment.Left
         TextLabel.ZIndex = 4 + zindex
 
         ClosePicker.Name = "ClosePicker"
         ClosePicker.Parent = ColorPickerFrame
-        ClosePicker.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
-        ClosePicker.BorderColor3 = Color3.fromRGB(47, 54, 64)
+        -- USE THEME COLOR
+        ClosePicker.BackgroundColor3 = CURRENT_THEME.Background
+        ClosePicker.BorderColor3 = CURRENT_THEME.Background
+        -- END USE THEME COLOR
         ClosePicker.Position = UDim2.new(0, 132, 0, 5)
         ClosePicker.Size = UDim2.new(0, 21, 0, 21)
         ClosePicker.Font = Enum.Font.SourceSans
         ClosePicker.Text = "X"
-        ClosePicker.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        ClosePicker.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         ClosePicker.TextSize = 18.000
         ClosePicker.ZIndex = 4 + zindex
         -- ROUND CORNERS ADDED
@@ -906,7 +1031,7 @@ function library:Window(name)
                 end)
             end
         else
-            ColorPicker.BackgroundColor3 = default or Color3.fromRGB(0, 168, 255)
+            ColorPicker.BackgroundColor3 = default or CURRENT_THEME.Accent -- Default to theme accent color
         end
 
         Canvas.Name = "Canvas"
@@ -1017,7 +1142,9 @@ function library:Window(name)
         Title.Size = UDim2.new(0, 118, 0, 21)
         Title.Font = Enum.Font.SourceSans
         Title.Text = name or "Color picker"
-        Title.TextColor3 = Color3.fromRGB(245, 246, 250)
+        -- USE THEME COLOR
+        Title.TextColor3 = CURRENT_THEME.Text
+        -- END USE THEME COLOR
         Title.TextSize = 16.000
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.ZIndex = 4 + zindex
