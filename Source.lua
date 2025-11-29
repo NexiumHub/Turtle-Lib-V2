@@ -9,6 +9,7 @@ local dropdownSizes = {}
 local destroyed
 
 local colorPickers = {}
+local notifications = {} -- NEW: Global table to track active notifications
 
 if game.CoreGui:FindFirstChild('TurtleUiLib') then
     game.CoreGui:FindFirstChild('TurtleUiLib'):Destroy()
@@ -294,7 +295,7 @@ function library:Window(name)
         
         -- Define the custom colors
         local OFF_COLOR = Color3.fromRGB(30, 34, 40) -- Darker than window background
-        local ON_COLOR = Color3.fromRGB(53, 59, 72)  -- Same as normal buttons, brighter than window background
+        local ON_COLOR = Color3.fromRGB(30, 34, 40)  -- Same as normal buttons, brighter than window background
 
         ToggleButton.Name = "ToggleButton"
         ToggleButton.Parent = ToggleDescription
@@ -1049,4 +1050,109 @@ function library:Window(name)
     return functions
 end
 
-return library
+---
+## 📣 New API: `library:Notification(text, time)`
+
+```lua
+function library:Notification(text, time)
+    local text = text or "Notification"
+    local time = time or 4 -- Default duration of 4 seconds
+    local notification_height = 50
+    local notification_width = 250
+    
+    -- Calculate the current Y position for the new notification
+    local y_offset = 20
+    for _, notif in pairs(notifications) do
+        y_offset = y_offset + notif.Size.Y.Offset + 10 -- Height + spacing
+    end
+
+    local NotificationFrame = Instance.new("Frame")
+    NotificationFrame.Name = "NotificationFrame"
+    NotificationFrame.Parent = TurtleUiLib
+    NotificationFrame.BackgroundColor3 = Color3.fromRGB(47, 54, 64)
+    NotificationFrame.BorderColor3 = Color3.fromRGB(47, 54, 64)
+    -- Start position: Top right, stacked based on existing notifications
+    NotificationFrame.Position = UDim2.new(1, -notification_width - 20, 0, y_offset)
+    NotificationFrame.Size = UDim2.new(0, notification_width, 0, notification_height)
+    NotificationFrame.ZIndex = 999 
+    
+    local Corner = Instance.new("UICorner")
+    Corner.CornerRadius = UDim.new(0, 5)
+    Corner.Parent = NotificationFrame
+
+    -- Header (Matching Window Header Style)
+    local Header = Instance.new("Frame")
+    Header.Name = "Header"
+    Header.Parent = NotificationFrame
+    Header.BackgroundColor3 = Color3.fromRGB(0, 168, 255)
+    Header.Size = UDim2.new(1, 0, 0, 5) -- Thin blue strip at the top
+    Header.ZIndex = 1000
+    
+    local HeaderCorner = Instance.new("UICorner")
+    HeaderCorner.CornerRadius = UDim.new(0, 5)
+    HeaderCorner.Parent = Header
+
+    -- Text
+    local NotificationText = Instance.new("TextLabel")
+    NotificationText.Name = "NotificationText"
+    NotificationText.Parent = NotificationFrame
+    NotificationText.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    NotificationText.BackgroundTransparency = 1.000
+    NotificationText.Position = UDim2.new(0, 5, 0, 5)
+    NotificationText.Size = UDim2.new(1, -10, 1, -10)
+    NotificationText.Font = Enum.Font.SourceSans
+    NotificationText.Text = text
+    NotificationText.TextColor3 = Color3.fromRGB(245, 246, 250)
+    NotificationText.TextSize = 16.000
+    NotificationText.TextWrapped = true
+    NotificationText.TextXAlignment = Enum.TextXAlignment.Left
+    NotificationText.TextYAlignment = Enum.TextYAlignment.Top
+    NotificationText.ZIndex = 1000
+
+    table.insert(notifications, NotificationFrame)
+    
+    -- Animation and Cleanup
+    spawn(function()
+        -- Fade in
+        for i = 0, 10 do
+            NotificationFrame.BackgroundTransparency = Lerp(1, 0, i/10)
+            NotificationFrame.BorderTransparency = Lerp(1, 0, i/10)
+            NotificationText.TextTransparency = Lerp(1, 0, i/10)
+            wait()
+        end
+
+        wait(time) -- Display time
+        
+        -- Fade out
+        for i = 0, 10 do
+            NotificationFrame.BackgroundTransparency = Lerp(0, 1, i/10)
+            NotificationFrame.BorderTransparency = Lerp(0, 1, i/10)
+            NotificationText.TextTransparency = Lerp(0, 1, i/10)
+            wait()
+        end
+        
+        local oldHeight = NotificationFrame.Size.Y.Offset
+        NotificationFrame:Destroy()
+
+        -- Remove from table
+        for i, v in ipairs(notifications) do
+            if v == NotificationFrame then
+                table.remove(notifications, i)
+                break
+            end
+        end
+
+        -- Shift all notifications above the removed one down
+        for _, v in pairs(notifications) do
+            if v.Position.Y.Offset > y_offset then
+                v:TweenPosition(
+                    UDim2.new(v.Position.X.Scale, v.Position.X.Offset, 0, v.Position.Y.Offset - oldHeight - 10),
+                    'Out',
+                    'Quad',
+                    0.2,
+                    true
+                )
+            end
+        end
+    end)
+end
